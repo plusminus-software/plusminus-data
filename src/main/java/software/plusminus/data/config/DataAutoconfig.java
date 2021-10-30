@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @Configuration
 @ComponentScan("software.plusminus.data")
 @EnableJpaRepositories("software.plusminus.data")
-public class DataConfig {
+public class DataAutoconfig {
 }

@@ -1,12 +1,12 @@
 package software.plusminus.data.repository;
 
-import company.plusminus.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import software.plusminus.data.service.entity.EntityService;
+import software.plusminus.util.EntityUtils;
 
 import java.util.Set;
 import javax.persistence.EntityManager;

@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-software.plusminus.data.config.DataConfig
+software.plusminus.data.config.DataAutoconfig

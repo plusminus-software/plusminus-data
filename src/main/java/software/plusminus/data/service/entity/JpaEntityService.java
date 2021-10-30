@@ -1,8 +1,8 @@
 package software.plusminus.data.service.entity;
 
-import company.plusminus.util.FieldUtils;
 import org.springframework.stereotype.Service;
 import software.plusminus.data.exception.NotFoundException;
+import software.plusminus.util.FieldUtils;
 
 import java.lang.reflect.Field;
 import java.util.Collection;

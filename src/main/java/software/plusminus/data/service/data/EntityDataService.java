@@ -1,13 +1,13 @@
 package software.plusminus.data.service.data;
 
-import company.plusminus.patch.service.PatchService;
-import company.plusminus.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import software.plusminus.data.exception.DataException;
 import software.plusminus.data.repository.DataRepository;
+import software.plusminus.patch.service.PatchService;
+import software.plusminus.util.EntityUtils;
 
 @Service
 @SuppressWarnings("squid:S00119")
