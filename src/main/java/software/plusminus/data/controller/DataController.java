@@ -25,7 +25,7 @@ import software.plusminus.data.model.Delete;
 import software.plusminus.data.model.Patch;
 import software.plusminus.data.model.Update;
 import software.plusminus.data.service.DataService;
-import software.plusminus.data.service.metadata.MetadataService;
+import software.plusminus.metadata.MetadataService;
 
 @SuppressWarnings({"java:S119", "ClassFanOutComplexity"})
 @RestController
