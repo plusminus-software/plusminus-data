@@ -1,4 +1,4 @@
-package software.plusminus.data;
+package software.plusminus;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "myField": "Some value 1"
+  },
+  {
+    "id": 2,
+    "myField": "Some value 2"
+  },
+  {
+    "id": 3,
+    "myField": "Some value 3"
+  },
+  {
+    "id": 4,
+    "myField": "Some value 4"
+  },
+  {
+    "id": 5,
+    "myField": "Some value 5"
+  }
+]

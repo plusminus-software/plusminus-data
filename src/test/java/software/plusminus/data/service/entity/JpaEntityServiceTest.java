@@ -1,10 +1,10 @@
 package software.plusminus.data.service.entity;
 
 import org.junit.Test;
-import software.plusminus.data.TestEntity;
 import software.plusminus.data.service.entity.test.EmbeddableClass;
 import software.plusminus.data.service.entity.test.MultiEntity;
 import software.plusminus.data.service.entity.test.SpringIdAnnotationEntity;
+import software.plusminus.fixtures.TestEntity;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +17,7 @@ public class JpaEntityServiceTest {
     private JpaEntityService service = new JpaEntityService();
 
     @Test
-    public void findSubentities() throws Exception {
+    public void findSubentities() {
         MultiEntity root = new MultiEntity();
         root.setName("root");
         MultiEntity left = new MultiEntity();
@@ -42,7 +42,7 @@ public class JpaEntityServiceTest {
     }
 
     @Test
-    public void findSubentitiesInCollection() throws Exception {
+    public void findSubentitiesInCollection() {
         MultiEntity root = new MultiEntity();
         root.setName("root");
         MultiEntity left = new MultiEntity();

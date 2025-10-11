@@ -18,8 +18,8 @@ import javax.persistence.Id;
 import javax.persistence.PersistenceContext;
 import javax.persistence.metamodel.ManagedType;
 
+@SuppressWarnings("java:S119")
 @Service
-@SuppressWarnings("squid:S00119")
 public class JpaEntityService implements EntityService {
 
     @PersistenceContext

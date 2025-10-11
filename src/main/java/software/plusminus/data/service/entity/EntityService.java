@@ -3,7 +3,7 @@ package software.plusminus.data.service.entity;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-@SuppressWarnings("squid:S00119")
+@SuppressWarnings("java:S119")
 public interface EntityService {
 
     <T> Set<Object> findSubentities(T object);

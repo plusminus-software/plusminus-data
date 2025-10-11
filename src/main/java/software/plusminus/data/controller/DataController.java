@@ -1,6 +1,7 @@
 package software.plusminus.data.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,36 +19,37 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import software.plusminus.crud.model.Create;
-import software.plusminus.crud.model.Delete;
-import software.plusminus.crud.model.Patch;
-import software.plusminus.crud.model.Update;
-import software.plusminus.data.service.data.DataService;
-import software.plusminus.data.service.entity.EntityService;
+import org.springframework.web.servlet.DispatcherServlet;
+import software.plusminus.data.model.Create;
+import software.plusminus.data.model.Delete;
+import software.plusminus.data.model.Patch;
+import software.plusminus.data.model.Update;
+import software.plusminus.data.service.DataService;
+import software.plusminus.data.service.metadata.MetadataService;
 
+@SuppressWarnings({"java:S119", "ClassFanOutComplexity"})
 @RestController
 @RequestMapping("/data")
 @ConditionalOnProperty("data.api")
-@SuppressWarnings("squid:S00119")
+@ConditionalOnClass(DispatcherServlet.class)
+@AllArgsConstructor
 public class DataController {
 
-    @Autowired
-    private EntityService entityService;
-    @Autowired
+    private MetadataService metadataService;
     private DataService service;
 
     @GetMapping("{type}/{id}")
     public <T, ID> T get(@PathVariable String type,
                          @PathVariable ID id) {
-        Class<T> clazz = entityService.findClass(type);
-        return service.read(clazz, id);
+        Class<T> clazz = metadataService.findType(type);
+        return service.getById(clazz, id);
     }
 
     @GetMapping("{type}")
     public <T> Page<T> getPage(@PathVariable String type,
                                @PageableDefault(direction = Sort.Direction.DESC) Pageable pageable) {
-        Class<T> clazz = entityService.findClass(type);
-        return service.read(clazz, pageable);
+        Class<T> clazz = metadataService.findType(type);
+        return service.getPage(clazz, pageable);
     }
 
     @PostMapping

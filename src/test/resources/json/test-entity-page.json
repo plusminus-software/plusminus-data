@@ -1,0 +1,32 @@
+{
+  "content" : [ {
+    "id" : 2,
+    "myField" : "Some value",
+    "list": []
+  } ],
+  "pageable" : {
+    "sort" : {
+      "sorted" : false,
+      "unsorted" : true,
+      "empty" : true
+    },
+    "pageSize" : 5,
+    "pageNumber" : 2,
+    "offset" : 10,
+    "unpaged" : false,
+    "paged" : true
+  },
+  "last" : false,
+  "totalPages" : 20,
+  "totalElements" : 100,
+  "first" : false,
+  "sort" : {
+    "sorted" : false,
+    "unsorted" : true,
+    "empty" : true
+  },
+  "numberOfElements" : 1,
+  "size" : 5,
+  "number" : 2,
+  "empty" : false
+}
