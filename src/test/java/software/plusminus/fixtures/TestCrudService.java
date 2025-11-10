@@ -17,7 +17,7 @@ package software.plusminus.fixtures;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import software.plusminus.crud.service.AbstractCrudService;
+import software.plusminus.data.service.AbstractCrudService;
 
 @Service
 @Profile("test")

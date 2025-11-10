@@ -2,12 +2,11 @@ package software.plusminus.data.service;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Component;
-import software.plusminus.crud.repository.CrudRepository;
-import software.plusminus.crud.repository.DataCrudRepository;
-import software.plusminus.crud.repository.SpringCrudRepository;
-import software.plusminus.crud.service.CrudService;
 import software.plusminus.data.exception.DataException;
+import software.plusminus.data.repository.CrudRepository;
+import software.plusminus.data.repository.DataCrudRepository;
 import software.plusminus.data.repository.DataRepository;
+import software.plusminus.data.repository.SpringCrudRepository;
 import software.plusminus.spring.SpringUtil;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package software.plusminus.crud.controller;
+package software.plusminus.data.controller;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import software.plusminus.check.util.JsonUtils;
-import software.plusminus.crud.service.CrudService;
+import software.plusminus.data.service.CrudService;
 import software.plusminus.data.service.DataService;
 import software.plusminus.fixtures.TestController;
 import software.plusminus.fixtures.TestEntity;

@@ -1,9 +1,8 @@
-package software.plusminus.crud.service;
+package software.plusminus.data.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import software.plusminus.data.service.DataService;
 
 @SuppressWarnings("java:S119")
 @AllArgsConstructor

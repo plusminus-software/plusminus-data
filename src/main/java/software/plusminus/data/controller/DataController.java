@@ -25,7 +25,7 @@ import software.plusminus.data.model.Delete;
 import software.plusminus.data.model.Patch;
 import software.plusminus.data.model.Update;
 import software.plusminus.data.service.DataService;
-import software.plusminus.metadata.MetadataService;
+import software.plusminus.metadata.MetadataContext;
 
 @SuppressWarnings({"java:S119", "ClassFanOutComplexity"})
 @RestController
@@ -35,20 +35,19 @@ import software.plusminus.metadata.MetadataService;
 @AllArgsConstructor
 public class DataController {
 
-    private MetadataService metadataService;
     private DataService service;
 
     @GetMapping("{type}/{id}")
     public <T, ID> T get(@PathVariable String type,
                          @PathVariable ID id) {
-        Class<T> clazz = metadataService.findType(type);
+        Class<T> clazz = MetadataContext.getClass(type);
         return service.getById(clazz, id);
     }
 
     @GetMapping("{type}")
     public <T> Page<T> getPage(@PathVariable String type,
                                @PageableDefault(direction = Sort.Direction.DESC) Pageable pageable) {
-        Class<T> clazz = metadataService.findType(type);
+        Class<T> clazz = MetadataContext.getClass(type);
         return service.getPage(clazz, pageable);
     }
 

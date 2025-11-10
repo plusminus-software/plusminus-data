@@ -1,37 +1,37 @@
-package software.plusminus.crud.repository;
+package software.plusminus.data.repository;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import software.plusminus.data.repository.DataRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 import javax.annotation.Nullable;
 
 @SuppressWarnings("java:S119")
 @AllArgsConstructor
-public class DataCrudRepository<T, ID> implements CrudRepository<T, ID> {
+public class SpringCrudRepository<T, ID> implements CrudRepository<T, ID> {
 
-    private Class<T> type;
-    private DataRepository dataRepository;
+    private PagingAndSortingRepository<T, ID> repository;
 
     @Override
     public T save(T entity) {
-        return dataRepository.save(entity);
+        return repository.save(entity);
     }
 
     @Nullable
     @Override
     public T getById(ID id) {
-        return dataRepository.getById(type, id);
+        return repository.findById(id)
+                .orElse(null);
     }
 
     @Override
     public Page<T> findAll(Pageable pageable) {
-        return dataRepository.findAll(type, pageable);
+        return repository.findAll(pageable);
     }
 
     @Override
     public void delete(T entity) {
-        dataRepository.delete(entity);
+        repository.delete(entity);
     }
 }

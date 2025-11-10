@@ -1,4 +1,4 @@
-package software.plusminus.crud.service.dto;
+package software.plusminus.data.service.dto;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;

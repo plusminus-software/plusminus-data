@@ -1,4 +1,4 @@
-package software.plusminus.crud.service;
+package software.plusminus.data.service;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,12 +13,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import software.plusminus.check.util.JsonUtils;
-import software.plusminus.crud.repository.CrudRepository;
-import software.plusminus.data.exception.DataException;
+import software.plusminus.crud.listener.CrudListenerContext;
+import software.plusminus.data.exception.ClientDataException;
 import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.data.model.Update;
+import software.plusminus.data.repository.CrudRepository;
 import software.plusminus.fixtures.TestEntity;
-import software.plusminus.listener.service.ListenerService;
 import software.plusminus.patch.service.PatchService;
 
 import java.util.Collections;
@@ -41,7 +41,7 @@ public class AbstractCrudServiceTest {
     @Mock
     private PatchService patchService;
     @Mock
-    private ListenerService listenerService;
+    private CrudListenerContext listenerContext;
     @Mock
     private CrudRepository<TestEntity, Long> repository;
     @InjectMocks
@@ -88,11 +88,11 @@ public class AbstractCrudServiceTest {
         TestEntity result = crudService.create(entity);
 
         assertThat(result).isSameAs(saved);
-        verify(listenerService).beforeCreate(entity);
-        verify(listenerService).afterCreate(saved);
+        verify(listenerContext).beforeCreate(entity);
+        verify(listenerContext).afterCreate(saved);
     }
 
-    @Test(expected = DataException.class)
+    @Test(expected = ClientDataException.class)
     public void create_WithId() {
         TestEntity entity = readEntity();
         crudService.create(entity);
@@ -107,11 +107,11 @@ public class AbstractCrudServiceTest {
         TestEntity result = crudService.update(entity);
 
         assertThat(result).isSameAs(saved);
-        verify(listenerService).beforeUpdate(entity);
-        verify(listenerService).afterUpdate(saved);
+        verify(listenerContext).beforeUpdate(entity);
+        verify(listenerContext).afterUpdate(saved);
     }
 
-    @Test(expected = DataException.class)
+    @Test(expected = ClientDataException.class)
     public void update_WithoutId() {
         TestEntity entity = readEntity();
         entity.setId(null);
@@ -131,12 +131,12 @@ public class AbstractCrudServiceTest {
 
         verify(patchService).patch(patch, entity);
         verify(validator).validate(entity, Update.class);
-        verify(listenerService).beforePatch(patch);
-        verify(listenerService).afterPatch(saved);
+        verify(listenerContext).beforePatch(patch);
+        verify(listenerContext).afterPatch(saved);
         assertThat(result).isSameAs(saved);
     }
 
-    @Test(expected = DataException.class)
+    @Test(expected = ClientDataException.class)
     public void patch_WithoutId() {
         TestEntity entity = readEntity();
         entity.setId(null);
@@ -151,8 +151,8 @@ public class AbstractCrudServiceTest {
 
         verify(repository).delete(captor.capture());
         assertThat(captor.getValue()).isSameAs(entity);
-        verify(listenerService).beforeDelete(entity);
-        verify(listenerService).afterDelete(entity);
+        verify(listenerContext).beforeDelete(entity);
+        verify(listenerContext).afterDelete(entity);
     }
 
     private TestEntity readEntity() {

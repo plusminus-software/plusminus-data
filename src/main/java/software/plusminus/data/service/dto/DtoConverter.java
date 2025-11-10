@@ -1,4 +1,4 @@
-package software.plusminus.crud.service.dto;
+package software.plusminus.data.service.dto;
 
 @SuppressWarnings("java:S119")
 public interface DtoConverter<DTO, O> {

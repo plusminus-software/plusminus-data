@@ -1,4 +1,4 @@
-package software.plusminus.crud.controller;
+package software.plusminus.data.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import software.plusminus.crud.service.CrudService;
 import software.plusminus.data.model.Create;
 import software.plusminus.data.model.Delete;
 import software.plusminus.data.model.Patch;
 import software.plusminus.data.model.Update;
+import software.plusminus.data.service.CrudService;
 import software.plusminus.data.service.DataService;
 import software.plusminus.data.util.DataUtil;
 

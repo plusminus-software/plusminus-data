@@ -15,7 +15,7 @@
  */
 package software.plusminus.fixtures;
 
-import software.plusminus.crud.repository.CrudRepository;
+import software.plusminus.data.repository.CrudRepository;
 
 public interface TestCrudRepository extends CrudRepository<TestEntity, Long> {
 }

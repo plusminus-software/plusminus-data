@@ -1,4 +1,4 @@
-package software.plusminus.crud.service.dto;
+package software.plusminus.data.service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ResolvableType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import software.plusminus.crud.service.CrudService;
-import software.plusminus.crud.service.DataCrudService;
+import software.plusminus.data.service.CrudService;
+import software.plusminus.data.service.DataCrudService;
 import software.plusminus.data.service.DataService;
 import software.plusminus.data.util.DataUtil;
 

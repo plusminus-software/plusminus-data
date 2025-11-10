@@ -1,16 +1,15 @@
-package software.plusminus.crud.service;
+package software.plusminus.data.service;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import software.plusminus.crud.repository.CrudRepository;
+import software.plusminus.crud.listener.CrudListenerContext;
 import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.data.model.Update;
-import software.plusminus.data.service.DataContext;
+import software.plusminus.data.repository.CrudRepository;
 import software.plusminus.data.util.DataUtil;
-import software.plusminus.listener.service.ListenerService;
 import software.plusminus.patch.service.PatchService;
 
 import javax.annotation.Nullable;
@@ -23,13 +22,13 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID>  
 
     private Validator validator;
     private PatchService patchService;
-    private ListenerService listenerService;
+    private CrudListenerContext listenerContext;
     private CrudRepository<T, ID> repository;
 
     @Autowired
     void init(Validator validator,
               PatchService patchService,
-              ListenerService listenerService,
+              CrudListenerContext listenerContext,
               @Nullable CrudRepository<T, ID> repository,
               DataContext dataContext) {
         if (this.validator == null) {
@@ -38,8 +37,8 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID>  
         if (this.patchService == null) {
             this.patchService = patchService;
         }
-        if (this.listenerService == null) {
-            this.listenerService = listenerService;
+        if (this.listenerContext == null) {
+            this.listenerContext = listenerContext;
         }
         if (this.repository == null) {
             this.repository = DataUtil.provideCrudRepository(repository, dataContext, this, CrudService.class);
@@ -52,32 +51,32 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID>  
         if (object == null) {
             throw new NotFoundException("Can't find object with id " + id);
         }
-        listenerService.afterRead(object);
+        listenerContext.afterRead(object);
         return object;
     }
 
     @Override
     public Page<T> getPage(Pageable pageable) {
         Page<T> page = repository.findAll(pageable);
-        page.forEach(listenerService::afterRead);
+        page.forEach(listenerContext::afterRead);
         return page;
     }
 
     @Override
     public T create(T object) {
         DataUtil.verifyOnCreate(object);
-        listenerService.beforeCreate(object);
+        listenerContext.beforeCreate(object);
         T created = repository.save(object);
-        listenerService.afterCreate(created);
+        listenerContext.afterCreate(created);
         return created;
     }
 
     @Override
     public T update(T object) {
         DataUtil.verifyOnUpdate(object);
-        listenerService.beforeUpdate(object);
+        listenerContext.beforeUpdate(object);
         T updated = repository.save(object);
-        listenerService.afterUpdate(updated);
+        listenerContext.afterUpdate(updated);
         return updated;
     }
 
@@ -85,19 +84,19 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID>  
     public T patch(T patch) {
         ID id = DataUtil.verifyOnPatch(patch);
         T target = getById(id);
-        listenerService.beforePatch(patch);
+        listenerContext.beforePatch(patch);
         patchService.patch(patch, target);
         validator.validate(target, Update.class);
         T saved = repository.save(target);
-        listenerService.afterPatch(saved);
+        listenerContext.afterPatch(saved);
         return saved;
     }
 
     @Override
     public void delete(T object) {
         DataUtil.verifyOnDelete(object);
-        listenerService.beforeDelete(object);
+        listenerContext.beforeDelete(object);
         repository.delete(object);
-        listenerService.afterDelete(object);
+        listenerContext.afterDelete(object);
     }
 }

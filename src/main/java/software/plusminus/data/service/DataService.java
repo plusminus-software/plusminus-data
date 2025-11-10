@@ -4,14 +4,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import software.plusminus.crud.repository.CrudRepository;
-import software.plusminus.crud.service.CrudService;
-import software.plusminus.data.exception.DataException;
+import software.plusminus.crud.listener.CrudListenerContext;
 import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.data.model.Update;
+import software.plusminus.data.repository.CrudRepository;
 import software.plusminus.data.repository.DataRepository;
 import software.plusminus.data.util.DataUtil;
-import software.plusminus.listener.service.ListenerService;
 import software.plusminus.patch.service.PatchService;
 
 import javax.annotation.Nullable;
@@ -24,7 +22,7 @@ public class DataService {
 
     private Validator validator;
     private PatchService patchService;
-    private ListenerService listenerService;
+    private CrudListenerContext listenerContext;
     private DataContext dataContext;
     private @Nullable DataRepository dataRepository;
 
@@ -40,12 +38,12 @@ public class DataService {
         } else if (dataRepository != null) {
             object = dataRepository.getById(type, id);
         } else {
-            throw new DataException("Can't find repository for type " + type);
+            throw new NotFoundException("Can't find repository for type " + type);
         }
         if (object == null) {
             throw new NotFoundException("Can't find object with id " + id);
         }
-        listenerService.afterRead(object);
+        listenerContext.afterRead(object);
         return object;
     }
 
@@ -61,9 +59,9 @@ public class DataService {
         } else if (dataRepository != null) {
             page = dataRepository.findAll(type, pageable);
         } else {
-            throw new DataException("Can't find repository for type " + type);
+            throw new NotFoundException("Can't find repository for type " + type);
         }
-        page.forEach(listenerService::afterRead);
+        page.forEach(listenerContext::afterRead);
         return page;
     }
 
@@ -74,7 +72,7 @@ public class DataService {
             return crudService.create(object);
         }
         DataUtil.verifyOnCreate(object);
-        listenerService.beforeCreate(object);
+        listenerContext.beforeCreate(object);
         T created;
         CrudRepository<T, ?> crudRepository = dataContext.findRepository(c);
         if (crudRepository != null) {
@@ -82,9 +80,9 @@ public class DataService {
         } else if (dataRepository != null) {
             created = dataRepository.save(object);
         } else {
-            throw new DataException("Can't find repository for type " + c);
+            throw new NotFoundException("Can't find repository for type " + c);
         }
-        listenerService.afterCreate(created);
+        listenerContext.afterCreate(created);
         return created;
     }
 
@@ -95,7 +93,7 @@ public class DataService {
             return crudService.update(object);
         }
         DataUtil.verifyOnUpdate(object);
-        listenerService.beforeUpdate(object);
+        listenerContext.beforeUpdate(object);
         T updated;
         CrudRepository<T, ?> crudRepository = dataContext.findRepository(c);
         if (crudRepository != null) {
@@ -103,9 +101,9 @@ public class DataService {
         } else if (dataRepository != null) {
             updated = dataRepository.save(object);
         } else {
-            throw new DataException("Can't find repository for type " + c);
+            throw new NotFoundException("Can't find repository for type " + c);
         }
-        listenerService.afterUpdate(updated);
+        listenerContext.afterUpdate(updated);
         return updated;
     }
 
@@ -117,7 +115,7 @@ public class DataService {
         }
         Object id = DataUtil.verifyOnPatch(patch);
         T target = getById(c, id);
-        listenerService.beforePatch(patch);
+        listenerContext.beforePatch(patch);
         patchService.patch(patch, target);
         validator.validate(target, Update.class);
         T saved;
@@ -127,9 +125,9 @@ public class DataService {
         } else if (dataRepository != null) {
             saved = dataRepository.save(target);
         } else {
-            throw new DataException("Can't find repository for type " + c);
+            throw new NotFoundException("Can't find repository for type " + c);
         }
-        listenerService.afterPatch(saved);
+        listenerContext.afterPatch(saved);
         return saved;
     }
 
@@ -141,15 +139,15 @@ public class DataService {
             return;
         }
         DataUtil.verifyOnDelete(object);
-        listenerService.beforeDelete(object);
+        listenerContext.beforeDelete(object);
         CrudRepository<T, ?> crudRepository = dataContext.findRepository(c);
         if (crudRepository != null) {
             crudRepository.delete(object);
         } else if (dataRepository != null) {
             dataRepository.delete(object);
         } else {
-            throw new DataException("Can't find repository for type " + c);
+            throw new NotFoundException("Can't find repository for type " + c);
         }
-        listenerService.afterDelete(object);
+        listenerContext.afterDelete(object);
     }
 }

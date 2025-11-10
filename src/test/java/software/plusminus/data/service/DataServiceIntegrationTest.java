@@ -11,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import software.plusminus.check.util.JsonUtils;
-import software.plusminus.crud.service.CrudService;
 import software.plusminus.fixtures.TestDto;
 import software.plusminus.fixtures.TestEntity;
 import software.plusminus.fixtures.TestUtil;

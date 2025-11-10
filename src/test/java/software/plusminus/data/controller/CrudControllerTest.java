@@ -1,4 +1,4 @@
-package software.plusminus.crud.controller;
+package software.plusminus.data.controller;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,7 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import software.plusminus.check.util.JsonUtils;
-import software.plusminus.crud.service.CrudService;
+import software.plusminus.data.service.CrudService;
 import software.plusminus.fixtures.TestEntity;
 
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
