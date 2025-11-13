@@ -51,7 +51,7 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID>  
         if (object == null) {
             throw new NotFoundException("Can't find object with id " + id);
         }
-        listenerContext.onRead(object);
+        listenerContext.onSingleRead(object);
         return object;
     }
 
