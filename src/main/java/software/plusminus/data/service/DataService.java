@@ -43,7 +43,7 @@ public class DataService {
         if (object == null) {
             throw new NotFoundException("Can't find object with id " + id);
         }
-        listenerContext.afterRead(object);
+        listenerContext.onRead(object);
         return object;
     }
 
@@ -61,7 +61,7 @@ public class DataService {
         } else {
             throw new NotFoundException("Can't find repository for type " + type);
         }
-        page.forEach(listenerContext::afterRead);
+        page.forEach(listenerContext::onRead);
         return page;
     }
 

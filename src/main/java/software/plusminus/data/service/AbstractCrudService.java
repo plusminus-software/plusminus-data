@@ -51,14 +51,14 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID>  
         if (object == null) {
             throw new NotFoundException("Can't find object with id " + id);
         }
-        listenerContext.afterRead(object);
+        listenerContext.onRead(object);
         return object;
     }
 
     @Override
     public Page<T> getPage(Pageable pageable) {
         Page<T> page = repository.findAll(pageable);
-        page.forEach(listenerContext::afterRead);
+        page.forEach(listenerContext::onRead);
         return page;
     }
 
