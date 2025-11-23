@@ -28,11 +28,11 @@ import software.plusminus.data.service.DataService;
 import software.plusminus.metadata.MetadataContext;
 
 @SuppressWarnings({"java:S119", "ClassFanOutComplexity"})
-@RestController
-@RequestMapping("/data")
-@ConditionalOnProperty("data.api")
-@ConditionalOnClass(DispatcherServlet.class)
 @AllArgsConstructor
+@RequestMapping("/data")
+@ConditionalOnClass(DispatcherServlet.class)
+@ConditionalOnProperty("plusminus.data.controller")
+@RestController
 public class DataController {
 
     private DataService service;

@@ -1,4 +1,4 @@
-package software.plusminus.fixtures;
+package software.plusminus.data.fixtures;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.Page;

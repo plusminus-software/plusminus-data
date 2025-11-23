@@ -5,9 +5,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import software.plusminus.data.fixtures.TestCrudRepository;
+import software.plusminus.data.fixtures.TestEntity;
 import software.plusminus.data.repository.CrudRepository;
-import software.plusminus.fixtures.TestCrudRepository;
-import software.plusminus.fixtures.TestEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

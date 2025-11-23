@@ -1,10 +1,10 @@
 package software.plusminus.data.service.entity;
 
 import org.junit.Test;
+import software.plusminus.data.fixtures.TestEntity;
 import software.plusminus.data.service.entity.test.EmbeddableClass;
 import software.plusminus.data.service.entity.test.MultiEntity;
 import software.plusminus.data.service.entity.test.SpringIdAnnotationEntity;
-import software.plusminus.fixtures.TestEntity;
 
 import java.util.Arrays;
 import java.util.Collections;

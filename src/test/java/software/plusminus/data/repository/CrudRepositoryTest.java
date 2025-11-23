@@ -13,9 +13,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import software.plusminus.check.util.JsonUtils;
-import software.plusminus.fixtures.TestCrudRepository;
-import software.plusminus.fixtures.TestEntity;
-import software.plusminus.fixtures.TestUtil;
+import software.plusminus.data.fixtures.TestCrudRepository;
+import software.plusminus.data.fixtures.TestEntity;
+import software.plusminus.data.fixtures.TestUtil;
 
 import java.util.List;
 

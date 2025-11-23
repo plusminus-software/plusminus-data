@@ -16,9 +16,9 @@ import software.plusminus.check.util.JsonUtils;
 import software.plusminus.crud.listener.CrudListenerContext;
 import software.plusminus.data.exception.ClientDataException;
 import software.plusminus.data.exception.NotFoundException;
+import software.plusminus.data.fixtures.TestEntity;
 import software.plusminus.data.model.Update;
 import software.plusminus.data.repository.CrudRepository;
-import software.plusminus.fixtures.TestEntity;
 import software.plusminus.patch.service.PatchService;
 
 import java.util.Collections;

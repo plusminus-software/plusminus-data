@@ -1,4 +1,4 @@
-package software.plusminus.fixtures;
+package software.plusminus.data.fixtures;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

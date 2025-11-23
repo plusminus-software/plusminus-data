@@ -4,8 +4,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import software.plusminus.check.util.JsonUtils;
-import software.plusminus.fixtures.TestDto;
-import software.plusminus.fixtures.TestEntity;
+import software.plusminus.data.fixtures.TestDto;
+import software.plusminus.data.fixtures.TestEntity;
 
 import static software.plusminus.check.Checks.check;
 

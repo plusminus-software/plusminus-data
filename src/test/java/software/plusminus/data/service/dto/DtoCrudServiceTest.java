@@ -13,9 +13,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import software.plusminus.check.util.JsonUtils;
+import software.plusminus.data.fixtures.TestDto;
+import software.plusminus.data.fixtures.TestEntity;
 import software.plusminus.data.service.CrudService;
-import software.plusminus.fixtures.TestDto;
-import software.plusminus.fixtures.TestEntity;
 
 import java.util.Collections;
 
