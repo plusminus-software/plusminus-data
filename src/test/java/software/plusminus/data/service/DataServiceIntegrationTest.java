@@ -1,30 +1,24 @@
 package software.plusminus.data.service;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import software.plusminus.check.util.JsonUtils;
 import software.plusminus.data.fixtures.TestDto;
 import software.plusminus.data.fixtures.TestEntity;
 import software.plusminus.data.fixtures.TestUtil;
 import software.plusminus.data.fixtures.TransactionService;
+import software.plusminus.test.IntegrationTest;
 
 import javax.persistence.EntityManager;
 
 import static org.mockito.Mockito.verify;
 import static software.plusminus.check.Checks.check;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class DataServiceIntegrationTest {
+public class DataServiceIntegrationTest extends IntegrationTest {
 
     @MockBean
     private CrudService<TestDto, Long> dtoService;

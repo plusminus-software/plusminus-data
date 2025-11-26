@@ -2,6 +2,7 @@ package software.plusminus.data.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import software.plusminus.util.EntityUtils;
 
 @SuppressWarnings("java:S119")
 public interface CrudService<T, ID> {
@@ -18,4 +19,9 @@ public interface CrudService<T, ID> {
 
     void delete(T object);
 
+    default T save(T object) {
+        return EntityUtils.findId(object) == null
+                ? create(object)
+                : update(object);
+    }
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import software.plusminus.check.util.JsonUtils;
 import software.plusminus.data.fixtures.TestEntity;
@@ -21,6 +22,7 @@ import static software.plusminus.check.Checks.check;
 @DataJpaTest
 @Import(JpaDataRepository.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@ActiveProfiles("test")
 public class JpaDataRepositoryTest {
 
     @Autowired

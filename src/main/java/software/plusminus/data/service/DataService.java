@@ -11,6 +11,7 @@ import software.plusminus.data.repository.CrudRepository;
 import software.plusminus.data.repository.DataRepository;
 import software.plusminus.data.util.DataUtil;
 import software.plusminus.patch.service.PatchService;
+import software.plusminus.util.EntityUtils;
 
 import javax.annotation.Nullable;
 import javax.validation.Validator;
@@ -149,5 +150,11 @@ public class DataService {
             throw new NotFoundException("Can't find repository for type " + c);
         }
         listenerContext.afterDelete(object);
+    }
+
+    public <T> T save(T object) {
+        return EntityUtils.findId(object) == null
+                ? create(object)
+                : update(object);
     }
 }
