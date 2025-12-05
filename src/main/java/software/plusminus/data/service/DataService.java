@@ -9,6 +9,7 @@ import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.data.model.Update;
 import software.plusminus.data.repository.CrudRepository;
 import software.plusminus.data.repository.DataRepository;
+import software.plusminus.data.repository.RepositoryContext;
 import software.plusminus.data.util.DataUtil;
 import software.plusminus.patch.service.PatchService;
 import software.plusminus.util.EntityUtils;
@@ -24,16 +25,17 @@ public class DataService {
     private Validator validator;
     private PatchService patchService;
     private CrudListenerContext listenerContext;
-    private DataContext dataContext;
+    private CrudServiceContext crudServiceContext;
+    private RepositoryContext repositoryContext;
     private @Nullable DataRepository dataRepository;
 
     public <T, ID> T getById(Class<T> type, ID id) {
-        CrudService<T, ID> crudService = dataContext.findService(type);
+        CrudService<T, ID> crudService = crudServiceContext.findService(type);
         if (crudService != null) {
             return crudService.getById(id);
         }
         T object;
-        CrudRepository<T, ID> crudRepository = dataContext.findRepository(type);
+        CrudRepository<T, ID> crudRepository = repositoryContext.findRepository(type);
         if (crudRepository != null) {
             object = crudRepository.getById(id);
         } else if (dataRepository != null) {
@@ -49,12 +51,12 @@ public class DataService {
     }
 
     public <T> Page<T> getPage(Class<T> type, Pageable pageable) {
-        CrudService<T, ?> crudService = dataContext.findService(type);
+        CrudService<T, ?> crudService = crudServiceContext.findService(type);
         if (crudService != null) {
             return crudService.getPage(pageable);
         }
         Page<T> page;
-        CrudRepository<T, ?> crudRepository = dataContext.findRepository(type);
+        CrudRepository<T, ?> crudRepository = repositoryContext.findRepository(type);
         if (crudRepository != null) {
             page = crudRepository.findAll(pageable);
         } else if (dataRepository != null) {
@@ -68,14 +70,14 @@ public class DataService {
 
     public <T> T create(T object) {
         Class<T> c = (Class<T>) object.getClass();
-        CrudService<T, ?> crudService = dataContext.findService(c);
+        CrudService<T, ?> crudService = crudServiceContext.findService(c);
         if (crudService != null) {
             return crudService.create(object);
         }
         DataUtil.verifyOnCreate(object);
         listenerContext.beforeCreate(object);
         T created;
-        CrudRepository<T, ?> crudRepository = dataContext.findRepository(c);
+        CrudRepository<T, ?> crudRepository = repositoryContext.findRepository(c);
         if (crudRepository != null) {
             created = crudRepository.save(object);
         } else if (dataRepository != null) {
@@ -89,14 +91,14 @@ public class DataService {
 
     public <T> T update(T object) {
         Class<T> c = (Class<T>) object.getClass();
-        CrudService<T, ?> crudService = dataContext.findService(c);
+        CrudService<T, ?> crudService = crudServiceContext.findService(c);
         if (crudService != null) {
             return crudService.update(object);
         }
         DataUtil.verifyOnUpdate(object);
         listenerContext.beforeUpdate(object);
         T updated;
-        CrudRepository<T, ?> crudRepository = dataContext.findRepository(c);
+        CrudRepository<T, ?> crudRepository = repositoryContext.findRepository(c);
         if (crudRepository != null) {
             updated = crudRepository.save(object);
         } else if (dataRepository != null) {
@@ -110,7 +112,7 @@ public class DataService {
 
     public <T> T patch(T patch) {
         Class<T> c = (Class<T>) patch.getClass();
-        CrudService<T, ?> crudService = dataContext.findService(c);
+        CrudService<T, ?> crudService = crudServiceContext.findService(c);
         if (crudService != null) {
             return crudService.patch(patch);
         }
@@ -120,7 +122,7 @@ public class DataService {
         patchService.patch(patch, target);
         validator.validate(target, Update.class);
         T saved;
-        CrudRepository<T, ?> crudRepository = dataContext.findRepository(c);
+        CrudRepository<T, ?> crudRepository = repositoryContext.findRepository(c);
         if (crudRepository != null) {
             saved = crudRepository.save(target);
         } else if (dataRepository != null) {
@@ -134,14 +136,14 @@ public class DataService {
 
     public <T> void delete(T object) {
         Class<T> c = (Class<T>) object.getClass();
-        CrudService<T, ?> crudService = dataContext.findService(c);
+        CrudService<T, ?> crudService = crudServiceContext.findService(c);
         if (crudService != null) {
             crudService.delete(object);
             return;
         }
         DataUtil.verifyOnDelete(object);
         listenerContext.beforeDelete(object);
-        CrudRepository<T, ?> crudRepository = dataContext.findRepository(c);
+        CrudRepository<T, ?> crudRepository = repositoryContext.findRepository(c);
         if (crudRepository != null) {
             crudRepository.delete(object);
         } else if (dataRepository != null) {

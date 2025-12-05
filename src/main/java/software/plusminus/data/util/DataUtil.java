@@ -4,8 +4,8 @@ import lombok.experimental.UtilityClass;
 import org.springframework.core.ResolvableType;
 import software.plusminus.data.exception.ClientDataException;
 import software.plusminus.data.repository.CrudRepository;
+import software.plusminus.data.repository.RepositoryContext;
 import software.plusminus.data.service.CrudService;
-import software.plusminus.data.service.DataContext;
 import software.plusminus.data.service.DataCrudService;
 import software.plusminus.data.service.DataService;
 import software.plusminus.data.service.dto.DtoConverter;
@@ -61,14 +61,14 @@ public class DataUtil {
     }
 
     public <T, ID, B> CrudRepository<T, ID> provideCrudRepository(@Nullable CrudRepository<T, ID> repository,
-                                                                  DataContext dataContext,
+                                                                  RepositoryContext repositoryContext,
                                                                   B bean,
                                                                   Class<? super B> beanType) {
         if (repository != null) {
             return repository;
         }
         Class<T> genericType = SpringUtil.resolveGenericType(bean, beanType);
-        return dataContext.provideRepository(genericType);
+        return repositoryContext.provideRepository(genericType);
     }
 
     public <DTO, E, B> DtoConverter<DTO, E> provideDtoConverter(@Nullable DtoConverter<DTO, E> converter,

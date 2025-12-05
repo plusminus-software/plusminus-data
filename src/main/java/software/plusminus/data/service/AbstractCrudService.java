@@ -9,6 +9,7 @@ import software.plusminus.crud.listener.CrudListenerContext;
 import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.data.model.Update;
 import software.plusminus.data.repository.CrudRepository;
+import software.plusminus.data.repository.RepositoryContext;
 import software.plusminus.data.util.DataUtil;
 import software.plusminus.patch.service.PatchService;
 
@@ -30,7 +31,7 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID>  
               PatchService patchService,
               CrudListenerContext listenerContext,
               @Nullable CrudRepository<T, ID> repository,
-              DataContext dataContext) {
+              RepositoryContext repositoryContext) {
         if (this.validator == null) {
             this.validator = validator;
         }
@@ -41,7 +42,7 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID>  
             this.listenerContext = listenerContext;
         }
         if (this.repository == null) {
-            this.repository = DataUtil.provideCrudRepository(repository, dataContext, this, CrudService.class);
+            this.repository = DataUtil.provideCrudRepository(repository, repositoryContext, this, CrudService.class);
         }
     }
 

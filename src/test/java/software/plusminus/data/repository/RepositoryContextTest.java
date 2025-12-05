@@ -1,4 +1,4 @@
-package software.plusminus.data.service;
+package software.plusminus.data.repository;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,21 +8,20 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import software.plusminus.data.fixtures.TestCrudRepository;
 import software.plusminus.data.fixtures.TestEntity;
-import software.plusminus.data.repository.CrudRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class DataContextTest {
+public class RepositoryContextTest {
 
     @Autowired
-    private DataContext dataContext;
+    private RepositoryContext repositoryContext;
 
     @Test
     public void findCrudRepository() {
-        CrudRepository<TestEntity, ?> repository = dataContext.findRepository(TestEntity.class);
+        CrudRepository<TestEntity, ?> repository = repositoryContext.findRepository(TestEntity.class);
         assertThat(repository).isNotNull()
                 .isInstanceOf(TestCrudRepository.class);
     }
