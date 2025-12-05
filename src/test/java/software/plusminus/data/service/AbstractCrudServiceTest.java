@@ -1,5 +1,6 @@
 package software.plusminus.data.service;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 import software.plusminus.check.util.JsonUtils;
 import software.plusminus.crud.listener.CrudListenerContext;
 import software.plusminus.data.exception.ClientDataException;
@@ -49,6 +51,11 @@ public class AbstractCrudServiceTest {
             mock(AbstractCrudService.class, Answers.CALLS_REAL_METHODS);
     @Captor
     private ArgumentCaptor<TestEntity> captor;
+
+    @Before
+    public void beforeEach() {
+        ReflectionTestUtils.setField(crudService, "self", null);
+    }
 
     @Test
     public void getById() {

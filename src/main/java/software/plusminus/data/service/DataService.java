@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import software.plusminus.crud.listener.CrudListenerContext;
 import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.data.model.Update;
@@ -29,6 +30,7 @@ public class DataService {
     private RepositoryContext repositoryContext;
     private @Nullable DataRepository dataRepository;
 
+    @Transactional(readOnly = true)
     public <T, ID> T getById(Class<T> type, ID id) {
         CrudService<T, ID> crudService = crudServiceContext.findService(type);
         if (crudService != null) {
@@ -50,6 +52,7 @@ public class DataService {
         return object;
     }
 
+    @Transactional(readOnly = true)
     public <T> Page<T> getPage(Class<T> type, Pageable pageable) {
         CrudService<T, ?> crudService = crudServiceContext.findService(type);
         if (crudService != null) {
@@ -68,6 +71,7 @@ public class DataService {
         return page;
     }
 
+    @Transactional
     public <T> T create(T object) {
         Class<T> c = (Class<T>) object.getClass();
         CrudService<T, ?> crudService = crudServiceContext.findService(c);
@@ -89,6 +93,7 @@ public class DataService {
         return created;
     }
 
+    @Transactional
     public <T> T update(T object) {
         Class<T> c = (Class<T>) object.getClass();
         CrudService<T, ?> crudService = crudServiceContext.findService(c);
@@ -110,6 +115,7 @@ public class DataService {
         return updated;
     }
 
+    @Transactional
     public <T> T patch(T patch) {
         Class<T> c = (Class<T>) patch.getClass();
         CrudService<T, ?> crudService = crudServiceContext.findService(c);
@@ -134,6 +140,7 @@ public class DataService {
         return saved;
     }
 
+    @Transactional
     public <T> void delete(T object) {
         Class<T> c = (Class<T>) object.getClass();
         CrudService<T, ?> crudService = crudServiceContext.findService(c);
@@ -154,6 +161,7 @@ public class DataService {
         listenerContext.afterDelete(object);
     }
 
+    @Transactional
     public <T> T save(T object) {
         return EntityUtils.findId(object) == null
                 ? create(object)
