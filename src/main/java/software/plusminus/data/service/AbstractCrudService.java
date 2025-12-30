@@ -142,4 +142,8 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID> {
         }
         return CrudService.super.save(object);
     }
+
+    protected CrudListenerContext listenerContext() {
+        return listenerContext;
+    }
 }
