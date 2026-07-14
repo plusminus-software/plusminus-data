@@ -1,0 +1,51 @@
+[
+  {
+    "@id": "1",
+    "class": "A",
+    "id": 1,
+    "uuid": "%s",
+    "name": "a",
+    "bs": [
+      {
+        ":dehydrated": true,
+        "class": "B",
+        "id": 1,
+        "uuid": "%s"
+      }
+    ],
+    "entityC": {
+      ":dehydrated": true,
+      "class": "C",
+      "id": 1,
+      "uuid": "%s"
+    }
+  },
+  {
+    "@id": "2",
+    "class": "B",
+    "id": 1,
+    "uuid": "%s",
+    "name": "b",
+    "entityA": {
+      ":dehydrated": true,
+      "class": "A",
+      "id": 1,
+      "uuid": "%s"
+    }
+  },
+  {
+    "@id": "3",
+    "class": "C",
+    "id": 1,
+    "uuid": "%s",
+    "name": "c",
+    "as": [
+      {
+        ":dehydrated": true,
+        "class": "A",
+        "id": 1,
+        "uuid": "%s"
+      }
+    ]
+  }
+]
