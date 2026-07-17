@@ -3,10 +3,10 @@ package software.plusminus.tenant.service;
 import lombok.AllArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import software.plusminus.data.event.CreateEvent;
-import software.plusminus.data.event.DeleteEvent;
+import software.plusminus.data.event.BeforeCreateEvent;
+import software.plusminus.data.event.BeforeDeleteEvent;
+import software.plusminus.data.event.BeforeUpdateEvent;
 import software.plusminus.data.event.ReadEvent;
-import software.plusminus.data.event.UpdateEvent;
 import software.plusminus.tenant.annotation.Tenant;
 import software.plusminus.tenant.context.TenantContext;
 import software.plusminus.tenant.exception.NotFoundException;
@@ -26,17 +26,17 @@ public class TenantListener {
     private TenantContext tenantContext;
 
     @EventListener
-    public void onCreate(CreateEvent<?> event) {
+    public void onCreate(BeforeCreateEvent<?> event) {
         applyOnWrite(event.getEntity(), true);
     }
 
     @EventListener
-    public void onUpdate(UpdateEvent<?> event) {
+    public void onUpdate(BeforeUpdateEvent<?> event) {
         applyOnWrite(event.getEntity(), false);
     }
 
     @EventListener
-    public void onDelete(DeleteEvent<?> event) {
+    public void onDelete(BeforeDeleteEvent<?> event) {
         applyOnWrite(event.getEntity(), false);
     }
 

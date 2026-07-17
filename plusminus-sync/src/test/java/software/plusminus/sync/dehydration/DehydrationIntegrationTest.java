@@ -10,6 +10,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import software.plusminus.data.service.DataService;
+import software.plusminus.jwt.service.IssuerContext;
 import software.plusminus.security.Security;
 import software.plusminus.tenant.context.TenantContext;
 import software.plusminus.test.IntegrationTest;
@@ -32,6 +33,8 @@ class DehydrationIntegrationTest extends IntegrationTest {
     private RestTemplateBuilder restTemplateBuilder;
     @SpyBean
     private TenantContext tenantContext;
+    @SpyBean
+    private IssuerContext issuerContext;
 
     private A entityA;
     private B entityB;
@@ -41,6 +44,7 @@ class DehydrationIntegrationTest extends IntegrationTest {
     @BeforeEach
     public void beforeEach() {
         super.beforeEach();
+        doReturn("localhost").when(issuerContext).get();
         entityA = new A();
         entityA.setName("a");
         entityA.setUuid(UUID.randomUUID());

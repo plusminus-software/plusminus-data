@@ -98,7 +98,7 @@ public class SyncControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        check(body).is('[' + json + ']');
+        check(body).isJson().is('[' + json + ']');
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

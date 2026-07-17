@@ -1,5 +1,6 @@
 package software.plusminus.data.repository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import software.plusminus.data.event.DataEventPublisher;
 import software.plusminus.util.EntityUtils;
 
 import java.util.List;
@@ -26,11 +28,15 @@ public class JpaDataRepository implements DataRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
+    @Autowired
+    private DataEventPublisher publisher;
 
     @Override
     @Transactional(readOnly = true)
     public <T, ID> T getById(Class<T> type, ID id) {
-        return entityManager.find(type, id);
+        T entity = entityManager.find(type, id);
+        publisher.publishRead(entity);
+        return entity;
     }
 
     @Override
@@ -46,6 +52,7 @@ public class JpaDataRepository implements DataRepository {
 
         List<T> content = typedQuery.getResultList();
         long total = countTotalElements(builder, type);
+        content.forEach(publisher::publishRead);
 
         return new PageImpl<>(content, pageable, total);
     }
@@ -54,17 +61,23 @@ public class JpaDataRepository implements DataRepository {
     @Transactional
     public <T> T save(T entity) {
         if (EntityUtils.findId(entity) == null) {
+            publisher.publishBeforeCreate(entity);
             entityManager.persist(entity);
+            publisher.publishCreate(entity);
             return entity;
-        } else {
-            return entityManager.merge(entity);
         }
+        publisher.publishBeforeUpdate(entity);
+        T merged = entityManager.merge(entity);
+        publisher.publishUpdate(merged);
+        return merged;
     }
 
     @Override
     @Transactional
     public <T> void delete(T entity) {
+        publisher.publishBeforeDelete(entity);
         entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
+        publisher.publishDelete(entity);
     }
 
     private <T> void applySorting(CriteriaBuilder builder, CriteriaQuery<T> query,

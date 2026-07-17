@@ -13,6 +13,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import software.plusminus.check.util.JsonUtil;
+import software.plusminus.data.event.DataEventPublisher;
 import software.plusminus.data.fixtures.TestEntity;
 import software.plusminus.data.fixtures.TestUtil;
 
@@ -20,7 +21,7 @@ import static software.plusminus.check.Checks.check;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(JpaDataRepository.class)
+@Import({JpaDataRepository.class, DataEventPublisher.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 public class JpaDataRepositoryTest {

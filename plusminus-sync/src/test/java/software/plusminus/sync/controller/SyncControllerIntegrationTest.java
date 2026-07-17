@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import software.plusminus.audit.context.DeviceContext;
 import software.plusminus.check.util.JsonUtil;
 import software.plusminus.data.service.DataService;
+import software.plusminus.jwt.service.IssuerContext;
 import software.plusminus.security.Security;
 import software.plusminus.sync.TestEntity;
 import software.plusminus.sync.dto.Sync;
@@ -55,6 +56,8 @@ public class SyncControllerIntegrationTest extends IntegrationTest {
     private DeviceContext deviceContext;
     @SpyBean
     private TenantContext tenantContext;
+    @SpyBean
+    private IssuerContext issuerContext;
 
     private TestEntity entity1;
     private TestEntity entity2;
@@ -66,6 +69,8 @@ public class SyncControllerIntegrationTest extends IntegrationTest {
 
     @Before
     public void before() {
+        doReturn(TENANT).when(issuerContext).get();
+
         entity1 = readTestEntity();
         entity1.setId(null);
         entity1.setVersion(null);

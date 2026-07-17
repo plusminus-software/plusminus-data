@@ -2,27 +2,21 @@ package software.plusminus.data.event.aspect;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import software.plusminus.data.event.fixtures.RecordingEventListener;
 import software.plusminus.data.event.fixtures.TestEntity;
 import software.plusminus.data.event.fixtures.TestEntityRepository;
+import software.plusminus.test.IntegrationTest;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static software.plusminus.check.Checks.check;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@ActiveProfiles("test")
-public class RepositoryEventAspectIntegrationTest {
+public class RepositoryEventAspectIntegrationTest extends IntegrationTest {
 
     @Autowired
     private TestEntityRepository repository;
@@ -30,8 +24,7 @@ public class RepositoryEventAspectIntegrationTest {
     private RecordingEventListener listener;
 
     @Before
-    public void setUp() {
-        repository.deleteAll();
+    public void clear() {
         listener.clear();
     }
 
@@ -39,9 +32,9 @@ public class RepositoryEventAspectIntegrationTest {
     public void firesCreateEventOnSaveOfNewEntity() {
         TestEntity saved = repository.save(entity("first"));
 
-        assertThat(listener.getCreated()).hasSize(1);
-        assertThat(listener.getCreated().get(0).getId()).isEqualTo(saved.getId());
-        assertThat(listener.getUpdated()).isEmpty();
+        check(listener.getBeforeCreate()).is(saved);
+        check(listener.getCreated()).is(saved);
+        check(listener.getUpdated()).isEmpty();
     }
 
     @Test
@@ -52,9 +45,9 @@ public class RepositoryEventAspectIntegrationTest {
         saved.setName("changed");
         repository.save(saved);
 
-        assertThat(listener.getUpdated()).hasSize(1);
-        assertThat(listener.getUpdated().get(0).getName()).isEqualTo("changed");
-        assertThat(listener.getCreated()).isEmpty();
+        check(listener.getBeforeUpdate()).is(saved);
+        check(listener.getUpdated()).is(saved);
+        check(listener.getCreated()).isEmpty();
     }
 
     @Test
@@ -64,8 +57,9 @@ public class RepositoryEventAspectIntegrationTest {
 
         repository.delete(saved);
 
-        assertThat(listener.getDeleted()).hasSize(1);
-        assertThat(listener.getDeleted().get(0).getId()).isEqualTo(saved.getId());
+        check(listener.getBeforeDelete()).is(saved);
+        check(listener.getDeleted()).is(saved);
+        check(listener.getUpdated()).isEmpty();
     }
 
     @Test
@@ -75,17 +69,16 @@ public class RepositoryEventAspectIntegrationTest {
 
         Optional<TestEntity> found = repository.findById(saved.getId());
 
-        assertThat(found).isPresent();
-        assertThat(listener.getRead()).hasSize(1);
-        assertThat(listener.getRead().get(0).getId()).isEqualTo(saved.getId());
+        check(found).isNotEmpty().is(saved);
+        check(listener.getRead()).is(saved);
     }
 
     @Test
     public void firesNoReadEventWhenEntityIsMissing() {
         Optional<TestEntity> found = repository.findById(-1L);
 
-        assertThat(found).isNotPresent();
-        assertThat(listener.getRead()).isEmpty();
+        check(found).isEmpty();
+        check(listener.getRead()).isEmpty();
     }
 
     @Test
@@ -95,17 +88,17 @@ public class RepositoryEventAspectIntegrationTest {
 
         Page<TestEntity> page = repository.findAll(PageRequest.of(0, 10));
 
-        assertThat(page.getContent()).hasSize(3);
-        assertThat(listener.getRead()).hasSize(3);
+        check(page.getContent()).hasSize(3);
+        check(listener.getRead()).hasSize(3);
     }
 
     @Test
     public void firesCreateEventPerSavedElement() {
         List<TestEntity> saved = repository.saveAll(Arrays.asList(entity("a"), entity("b")));
 
-        assertThat(saved).hasSize(2);
-        assertThat(listener.getCreated()).hasSize(2);
-        assertThat(listener.getUpdated()).isEmpty();
+        check(saved).hasSize(2);
+        check(listener.getCreated()).hasSize(2);
+        check(listener.getUpdated()).isEmpty();
     }
 
     private TestEntity entity(String name) {

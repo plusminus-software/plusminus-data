@@ -1,5 +1,6 @@
 package software.plusminus.sync.service;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static software.plusminus.check.Checks.check;
 
@@ -33,7 +35,18 @@ public class AuditSyncServiceIntegrationTest extends IntegrationTest {
     private TransactionalService transactionalService;
     @SpyBean
     private DataService dataService;
-    
+
+    /* DataService is @Transactional, so its bean is an AOP proxy around the spy.
+       Spring Boot 2.2 can't resolve a mock through the proxy, so it never resets it between tests. */
+    @Before
+    public void resetDataService() {
+        reset(dataService());
+    }
+
+    private DataService dataService() {
+        return AopTestUtils.getUltimateTargetObject(dataService);
+    }
+
     @Test
     public void createObjectWithInnerEntity() {
         Product product = new Product();
@@ -46,8 +59,8 @@ public class AuditSyncServiceIntegrationTest extends IntegrationTest {
                 Sync.of(product, SyncType.CREATE, null, null)));
         
         assertThat(result).asList().containsExactly(productOutcome, product);
-        verify(AopTestUtils.<DataService>getUltimateTargetObject(dataService)).create(product);
-        verify(AopTestUtils.<DataService>getUltimateTargetObject(dataService)).create(productOutcome);
+        verify(dataService()).create(product);
+        verify(dataService()).create(productOutcome);
         transactionalService.inTransaction(() -> {
             check(result.get(0))
                     .isInstanceOf(ProductOutcome.class)
@@ -113,7 +126,7 @@ public class AuditSyncServiceIntegrationTest extends IntegrationTest {
         Product resultProduct = (Product) result.get(0); 
         assertThat(resultProduct.getId()).isEqualTo(productIndDb.getId());
         assertThat(resultProduct.getVersion()).isEqualTo(1L);
-        verify(AopTestUtils.<DataService>getUltimateTargetObject(dataService)).update(product);
+        verify(dataService()).update(product);
     }
     
     @Test
