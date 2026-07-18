@@ -11,6 +11,11 @@ public interface CollectionElementPatcher {
     <T> Object toKey(Field field, Collection<T> collection, T element);
 
     @Nullable
+    default <T> Object toKey(Field field, Collection<T> collection, T element, int index) {
+        return toKey(field, collection, element);
+    }
+
+    @Nullable
     default <T> T toValue(Field field, Collection<T> collection, T element) {
         return element;
     }

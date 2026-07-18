@@ -13,12 +13,11 @@ import software.plusminus.data.util.DataUtil;
 import software.plusminus.patch.service.PatchService;
 
 import javax.annotation.Nullable;
-import javax.validation.Validator;
 
 @SuppressWarnings("java:S119")
 public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID> {
 
-    private Validator validator;
+    private DataValidator dataValidator;
     private PatchService patchService;
     private CrudRepository<T, ID> repository;
     @Nullable
@@ -27,22 +26,22 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID> {
     protected AbstractCrudService() {
     }
 
-    protected AbstractCrudService(Validator validator,
+    protected AbstractCrudService(DataValidator dataValidator,
                                   PatchService patchService,
                                   CrudRepository<T, ID> repository) {
-        this.validator = validator;
+        this.dataValidator = dataValidator;
         this.patchService = patchService;
         this.repository = repository;
     }
 
     @Autowired
-    void init(Validator validator,
+    void init(DataValidator dataValidator,
               PatchService patchService,
               @Nullable CrudRepository<T, ID> repository,
               RepositoryContext repositoryContext,
               ObjectProvider<AbstractCrudService<T, ID>> self) {
-        if (this.validator == null) {
-            this.validator = validator;
+        if (this.dataValidator == null) {
+            this.dataValidator = dataValidator;
         }
         if (this.patchService == null) {
             this.patchService = patchService;
@@ -99,7 +98,7 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID> {
         ID id = DataUtil.verifyOnPatch(patch);
         T target = getById(id);
         patchService.patch(patch, target);
-        validator.validate(target, Update.class);
+        dataValidator.validate(target, Update.class);
         return repository.save(target);
     }
 

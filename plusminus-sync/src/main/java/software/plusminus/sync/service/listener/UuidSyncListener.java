@@ -1,7 +1,6 @@
 package software.plusminus.sync.service.listener;
 
-import com.zaxxer.hikari.util.FastList;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import software.plusminus.data.repository.DataRepository;
@@ -12,15 +11,15 @@ import software.plusminus.sync.dto.SyncType;
 import software.plusminus.util.FieldUtils;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@AllArgsConstructor
 @Component
 public class UuidSyncListener implements SyncListener {
 
-    @Autowired
     private DataRepository repository;
     
     @Override
@@ -51,10 +50,8 @@ public class UuidSyncListener implements SyncListener {
     }
     
     private boolean isSupportedType(Class c) {
-        if (Collections.class.isAssignableFrom(c)
-                && !FastList.class.isAssignableFrom(c)) {
-            return true;
-        }
-        return c == UUID.class || c == String.class;
+        return Collection.class.isAssignableFrom(c)
+                || c == UUID.class
+                || c == String.class;
     }
 }

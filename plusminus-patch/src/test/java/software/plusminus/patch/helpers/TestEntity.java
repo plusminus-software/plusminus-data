@@ -1,6 +1,7 @@
 package software.plusminus.patch.helpers;
 
 import lombok.Data;
+import software.plusminus.patch.annotation.CollectionPatch;
 import software.plusminus.patch.annotation.StringCollectionPatch;
 
 import java.util.ArrayList;
@@ -13,5 +14,8 @@ public class TestEntity {
 
     @StringCollectionPatch(splitter = ":")
     private List<String> list = new ArrayList<>();
+
+    @CollectionPatch
+    private List<String> plainList = new ArrayList<>();
 
 }

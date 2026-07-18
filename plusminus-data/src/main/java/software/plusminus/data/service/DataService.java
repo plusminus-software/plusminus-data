@@ -15,14 +15,13 @@ import software.plusminus.patch.service.PatchService;
 import software.plusminus.util.EntityUtils;
 
 import javax.annotation.Nullable;
-import javax.validation.Validator;
 
 @SuppressWarnings("java:S119")
 @AllArgsConstructor
 @Service
 public class DataService {
 
-    private Validator validator;
+    private DataValidator dataValidator;
     private PatchService patchService;
     private CrudServiceContext crudServiceContext;
     private RepositoryContext repositoryContext;
@@ -117,7 +116,7 @@ public class DataService {
         Object id = DataUtil.verifyOnPatch(patch);
         T target = getById(c, id);
         patchService.patch(patch, target);
-        validator.validate(target, Update.class);
+        dataValidator.validate(target, Update.class);
         T saved;
         CrudRepository<T, ?> crudRepository = repositoryContext.findRepository(c);
         if (crudRepository != null) {

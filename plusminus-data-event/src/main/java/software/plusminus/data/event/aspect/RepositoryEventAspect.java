@@ -6,6 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import software.plusminus.data.event.DataEventPublisher;
 import software.plusminus.util.EntityUtils;
@@ -14,6 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Publishes data events around Spring Data repository calls.
+ *
+ * <p>Bulk operations that receive neither entities nor ids
+ * ({@code deleteAll()}, {@code deleteAllInBatch()}, {@code deleteInBatch(...)})
+ * do not publish events.
+ */
 @Aspect
 @Component
 @AllArgsConstructor
@@ -40,6 +48,16 @@ public class RepositoryEventAspect {
 
     @Pointcut("execution(* org.springframework.data.repository.Repository+.deleteAll(..))")
     void deleteAll() {
+        // pointcut declaration
+    }
+
+    @Pointcut("execution(* org.springframework.data.repository.Repository+.deleteById(..))")
+    void deleteById() {
+        // pointcut declaration
+    }
+
+    @Pointcut("execution(* org.springframework.data.repository.Repository+.deleteAllById(..))")
+    void deleteAllById() {
         // pointcut declaration
     }
 
@@ -90,6 +108,30 @@ public class RepositoryEventAspect {
         return result;
     }
 
+    @Around("deleteById() && args(id)")
+    public Object aroundDeleteById(ProceedingJoinPoint joinPoint, Object id) {
+        Object entity = findEntity(joinPoint.getTarget(), id);
+        publisher.publishBeforeDelete(entity);
+        Object result = proceed(joinPoint);
+        publisher.publishDelete(entity);
+        return result;
+    }
+
+    @Around("deleteAllById() && args(ids)")
+    public Object aroundDeleteAllById(ProceedingJoinPoint joinPoint, Iterable<?> ids) {
+        List<Object> entities = new ArrayList<>();
+        ids.forEach(id -> {
+            Object entity = findEntity(joinPoint.getTarget(), id);
+            if (entity != null) {
+                entities.add(entity);
+            }
+        });
+        entities.forEach(publisher::publishBeforeDelete);
+        Object result = proceed(joinPoint);
+        entities.forEach(publisher::publishDelete);
+        return result;
+    }
+
     @Around("read()")
     public Object aroundRead(ProceedingJoinPoint joinPoint) {
         Object result = proceed(joinPoint);
@@ -120,6 +162,14 @@ public class RepositoryEventAspect {
         } else {
             publisher.publishUpdate(entity);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object findEntity(Object repository, Object id) {
+        if (!(repository instanceof CrudRepository)) {
+            return null;
+        }
+        return ((CrudRepository<?, Object>) repository).findById(id).orElse(null);
     }
 
     private void publishReads(Object result) {

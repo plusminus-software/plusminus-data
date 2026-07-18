@@ -9,17 +9,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import software.plusminus.data.exception.ClientDataException;
 import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.data.fixtures.TestEntity;
+import software.plusminus.data.model.Update;
 import software.plusminus.data.repository.CrudRepository;
 import software.plusminus.data.repository.DataRepository;
 import software.plusminus.data.repository.RepositoryContext;
 import software.plusminus.patch.service.PatchService;
 
 import java.util.Collections;
-import javax.validation.Validator;
 
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static software.plusminus.check.Checks.check;
@@ -28,7 +30,7 @@ import static software.plusminus.check.Checks.check;
 public class DataServiceTest {
 
     @Mock
-    private Validator validator;
+    private DataValidator dataValidator;
     @Mock
     private PatchService patchService;
     @Mock
@@ -50,7 +52,7 @@ public class DataServiceTest {
     }
 
     private DataService withDataRepository(DataRepository repository) {
-        return new DataService(validator, patchService,
+        return new DataService(dataValidator, patchService,
                 crudServiceContext, repositoryContext, repository);
     }
 
@@ -220,6 +222,17 @@ public class DataServiceTest {
         when(dataRepository.getById(TestEntity.class, 1L)).thenReturn(target);
         when(dataRepository.save(target)).thenReturn(target);
         check(dataService.patch(patch)).isSame(target);
+    }
+
+    @Test(expected = ClientDataException.class)
+    public void patchThrowsWhenPatchedTargetIsInvalid() {
+        TestEntity patch = entity(1L);
+        TestEntity target = entity(1L);
+        when(dataRepository.getById(TestEntity.class, 1L)).thenReturn(target);
+        doThrow(new ClientDataException("Validation failed"))
+                .when(dataValidator).validate(target, Update.class);
+
+        dataService.patch(patch);
     }
 
     // ---------- delete ----------

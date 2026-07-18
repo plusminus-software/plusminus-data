@@ -13,6 +13,7 @@ import software.plusminus.patch.helpers.TestEntity;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,8 +72,29 @@ public class CollectionPatcherTest {
         verifyElementPatcher();
     }
 
+    @Test
+    public void patch_ListWithEqualElements() {
+        CollectionPatcher indexPatcher = new CollectionPatcher(
+                Collections.<CollectionElementPatcher>singletonList(new IndexCollectionElementPatcher()));
+        TestEntity sourceEntity = new TestEntity();
+        sourceEntity.getPlainList().addAll(Arrays.asList("x", "x", "y"));
+        TestEntity targetEntity = new TestEntity();
+        targetEntity.getPlainList().addAll(Arrays.asList("a", "a", "b"));
+
+        indexPatcher.patch(sourceEntity, targetEntity);
+
+        assertThat(sourceEntity.getPlainList()).containsExactly("x", "x", "y");
+    }
+
     private void verifyElementPatcher() throws NoSuchFieldException {
         Field field = TestEntity.class.getDeclaredField("list");
+
+        verify(elementPatcher).toKey(field, SOURCE_LIST, "key1:updatedValue1", 0);
+        verify(elementPatcher).toKey(field, SOURCE_LIST, "key2:", 1);
+        verify(elementPatcher).toKey(field, SOURCE_LIST, "key4:addedValue4", 2);
+        verify(elementPatcher).toKey(field, TARGET_LIST, "key1:value1", 0);
+        verify(elementPatcher).toKey(field, TARGET_LIST, "key2:value2", 1);
+        verify(elementPatcher).toKey(field, TARGET_LIST, "key3:value3", 2);
 
         verify(elementPatcher).toKey(field, SOURCE_LIST, "key1:updatedValue1");
         verify(elementPatcher).toKey(field, SOURCE_LIST, "key2:");
@@ -93,6 +115,13 @@ public class CollectionPatcherTest {
 
     private void verifyNullElementPatcher() throws NoSuchFieldException {
         Field field = TestEntity.class.getDeclaredField("list");
+
+        verify(nullElementPatcher).toKey(field, SOURCE_LIST, "key1:updatedValue1", 0);
+        verify(nullElementPatcher).toKey(field, SOURCE_LIST, "key2:", 1);
+        verify(nullElementPatcher).toKey(field, SOURCE_LIST, "key4:addedValue4", 2);
+        verify(nullElementPatcher).toKey(field, TARGET_LIST, "key1:value1", 0);
+        verify(nullElementPatcher).toKey(field, TARGET_LIST, "key2:value2", 1);
+        verify(nullElementPatcher).toKey(field, TARGET_LIST, "key3:value3", 2);
 
         verify(nullElementPatcher).toKey(field, SOURCE_LIST, "key1:updatedValue1");
         verify(nullElementPatcher).toKey(field, SOURCE_LIST, "key2:");

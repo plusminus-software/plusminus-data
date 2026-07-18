@@ -11,31 +11,27 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.stereotype.Service;
-import software.plusminus.util.ObjectUtils;
 
 import java.util.function.BiPredicate;
-import java.util.stream.Stream;
 
 @Service
 public class SyncJsonService {
 
+    private static final ObjectMapper MAPPER;
+
+    static {
+        MAPPER = new ObjectMapper();
+        MAPPER.addMixIn(Object.class, DynamicFilterMixin.class);
+    }
+
     public String toJson(Object object, BiPredicate<Object, PropertyWriter> filter) {
-        ObjectMapper mapper = new ObjectMapper();
         FilterProvider filterProvider = new SimpleFilterProvider()
                 .addFilter("DynamicFilter", new DynamicFilter(filter));
-        mapper.setFilterProvider(filterProvider);
-        findReferences(object)
-                .forEach(c -> mapper.addMixIn(c, DynamicFilterMixin.class));
         try {
-            return mapper.writeValueAsString(object);
+            return MAPPER.writer(filterProvider).writeValueAsString(object);
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e);
         }
-    }
-    
-    private Stream<Class<?>> findReferences(Object object) {
-        return ObjectUtils.findReferences(object).stream()
-                .map(Object::getClass);
     }
 
     private static final class DynamicFilter extends SimpleBeanPropertyFilter {

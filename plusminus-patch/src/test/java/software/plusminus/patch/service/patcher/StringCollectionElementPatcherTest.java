@@ -3,10 +3,13 @@ package software.plusminus.patch.service.patcher;
 import lombok.Data;
 import org.junit.Test;
 import software.plusminus.patch.annotation.StringCollectionPatch;
+import software.plusminus.patch.exception.PatchException;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 public class StringCollectionElementPatcherTest {
@@ -32,6 +35,14 @@ public class StringCollectionElementPatcherTest {
         String element = "value:";
         Object key = converter.toValue(StringKeyEntity.class.getDeclaredField("strings"), null, element);
         assertThat(key).isNull();
+    }
+
+    @Test
+    public void toKey_ThrowsPatchExceptionIfElementHasNoSplitter() throws NoSuchFieldException {
+        Field field = StringKeyEntity.class.getDeclaredField("strings");
+        assertThatThrownBy(() -> converter.toKey(field, null, "valueWithoutSplitter"))
+                .isInstanceOf(PatchException.class)
+                .hasMessageContaining("valueWithoutSplitter");
     }
 
     @Data

@@ -53,6 +53,7 @@ public class AuditSyncService implements SyncService {
     private List<SyncPostListener> postListeners = Collections.emptyList();
 
     @Override
+    @Transactional(readOnly = true)
     public List<Sync<? extends ApiObject>> read(List<String> types, boolean excludeCurrentDevice,
                                                 Long offset, Integer size,
                                                 Sort.Direction direction) {

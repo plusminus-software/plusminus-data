@@ -78,7 +78,7 @@ public class TenantListener {
             if (read) {
                 throw new NotFoundException();
             }
-            throw new TenantException("Cannot peform action on object with tenant '" + object
+            throw new TenantException("Cannot perform action on object with tenant '" + object
                     + "' as the current tenant is '" + context + "'");
         }
     }

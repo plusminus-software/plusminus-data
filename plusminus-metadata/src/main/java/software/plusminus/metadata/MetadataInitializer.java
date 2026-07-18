@@ -1,16 +1,19 @@
 package software.plusminus.metadata;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class MetadataInitializer implements BeanPostProcessor {
+@AllArgsConstructor
+public class MetadataInitializer implements SmartInitializingSingleton {
 
-    @Autowired
-    void init(List<MetadataProvider> providers) {
+    private List<MetadataProvider> providers;
+
+    @Override
+    public void afterSingletonsInstantiated() {
         providers.stream()
                 .map(MetadataProvider::provideClasses)
                 .flatMap(List::stream)

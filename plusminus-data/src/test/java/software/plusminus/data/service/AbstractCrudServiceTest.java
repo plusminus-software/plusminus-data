@@ -23,9 +23,9 @@ import software.plusminus.data.repository.CrudRepository;
 import software.plusminus.patch.service.PatchService;
 
 import java.util.Collections;
-import javax.validation.Validator;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,7 +38,7 @@ public class AbstractCrudServiceTest {
     private static final String SAVED = "saved";
 
     @Mock
-    private Validator validator;
+    private DataValidator dataValidator;
     @Mock
     private PatchService patchService;
     @Mock
@@ -130,7 +130,7 @@ public class AbstractCrudServiceTest {
         TestEntity result = crudService.patch(patch);
 
         verify(patchService).patch(patch, entity);
-        verify(validator).validate(entity, Update.class);
+        verify(dataValidator).validate(entity, Update.class);
         assertThat(result).isSameAs(saved);
     }
 
@@ -139,6 +139,17 @@ public class AbstractCrudServiceTest {
         TestEntity entity = readEntity();
         entity.setId(null);
         crudService.patch(entity);
+    }
+
+    @Test(expected = ClientDataException.class)
+    public void patch_WithInvalidTarget() {
+        TestEntity patch = readEntity("patch");
+        TestEntity entity = readEntity(ENTITY);
+        when(repository.getById(2L)).thenReturn(entity);
+        doThrow(new ClientDataException("Validation failed"))
+                .when(dataValidator).validate(entity, Update.class);
+
+        crudService.patch(patch);
     }
 
     @Test

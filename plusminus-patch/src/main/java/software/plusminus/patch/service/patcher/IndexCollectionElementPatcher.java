@@ -22,4 +22,13 @@ public class IndexCollectionElementPatcher implements CollectionElementPatcher {
         }
         return new ArrayList<>(collection).indexOf(element);
     }
+
+    @Nullable
+    @Override
+    public <T> Object toKey(Field field, Collection<T> collection, T element, int index) {
+        if (!List.class.isAssignableFrom(collection.getClass())) {
+            return null;
+        }
+        return index;
+    }
 }

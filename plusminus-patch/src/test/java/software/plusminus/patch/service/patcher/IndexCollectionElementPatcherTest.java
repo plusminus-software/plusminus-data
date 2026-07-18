@@ -28,4 +28,18 @@ public class IndexCollectionElementPatcherTest {
         assertThat(key).isNull();
     }
 
+    @Test
+    public void toKey_Positional_UsesProvidedIndex() {
+        List<String> elements = Arrays.asList("same", "same", "same");
+        Object key = converter.toKey(null, elements, "same", 2);
+        assertThat(key).isEqualTo(2);
+    }
+
+    @Test
+    public void toKey_Positional_IfNotList() {
+        Set<String> elements = Sets.newLinkedHashSet("zero", "one", "two");
+        Object key = converter.toKey(null, elements, "one", 1);
+        assertThat(key).isNull();
+    }
+
 }

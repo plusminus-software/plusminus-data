@@ -63,6 +63,18 @@ public class RepositoryEventAspectIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void firesDeleteEventsOnDeleteById() {
+        TestEntity saved = repository.save(entity("first"));
+        listener.clear();
+
+        repository.deleteById(saved.getId());
+
+        check(listener.getBeforeDelete()).is(saved);
+        check(listener.getDeleted()).is(saved);
+        check(listener.getRead()).isEmpty();
+    }
+
+    @Test
     public void firesReadEventOnFindById() {
         TestEntity saved = repository.save(entity("first"));
         listener.clear();

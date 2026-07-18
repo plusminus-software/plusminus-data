@@ -1,6 +1,6 @@
 package software.plusminus.patch.service.patcher;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -10,16 +10,19 @@ import software.plusminus.util.FieldUtils;
 
 import java.lang.reflect.Field;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
+@AllArgsConstructor
 @Component
 public class CollectionPatcher implements Patcher {
 
-    @Autowired
     private List<CollectionElementPatcher> patchers;
 
     @Override
@@ -73,21 +76,22 @@ public class CollectionPatcher implements Patcher {
         /* Stream API is not used here because Collectors.toMap throws NPE in case value is null */
         Map<Object, T> result = new LinkedHashMap<>();
 
-        collection.stream()
-                .map(element -> getKeyValue(collectionField, collection, element))
-                .forEach(entry -> {
-                    if (result.containsKey(entry.getKey())) {
-                        throw new IllegalStateException(String.format("Duplicate key %s", entry.getKey()));
-                    }
-                    result.put(entry.getKey(), entry.getValue());
-                });
+        int index = 0;
+        for (T element : collection) {
+            Map.Entry<Object, T> entry = getKeyValue(collectionField, collection, element, index);
+            index++;
+            if (result.containsKey(entry.getKey())) {
+                throw new IllegalStateException(String.format("Duplicate key %s", entry.getKey()));
+            }
+            result.put(entry.getKey(), entry.getValue());
+        }
         return result;
     }
 
-    private <T> Map.Entry<Object, T> getKeyValue(Field field, Collection<T> collection, T element) {
+    private <T> Map.Entry<Object, T> getKeyValue(Field field, Collection<T> collection, T element, int index) {
         return patchers.stream()
                 .map(patcher -> {
-                    Object key = patcher.toKey(field, collection, element);
+                    Object key = patcher.toKey(field, collection, element, index);
                     if (key == null) {
                         return null;
                     }
@@ -109,7 +113,18 @@ public class CollectionPatcher implements Patcher {
             wrapCollection.addAll(newCollection);
             return wrapCollection;
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new PatchException(e);
+            return fallbackCollection(sourceCollection, newCollection);
         }
+    }
+
+    private <T> Collection<T> fallbackCollection(Collection<T> sourceCollection, Collection<T> newCollection) {
+        if (sourceCollection instanceof List) {
+            return new ArrayList<>(newCollection);
+        }
+        if (sourceCollection instanceof Set) {
+            return new LinkedHashSet<>(newCollection);
+        }
+        throw new PatchException("Cannot instantiate a collection of type "
+                + sourceCollection.getClass().getName() + " to write the patched elements into");
     }
 }

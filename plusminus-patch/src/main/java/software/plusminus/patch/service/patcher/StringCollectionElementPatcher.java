@@ -1,12 +1,17 @@
 package software.plusminus.patch.service.patcher;
 
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 import software.plusminus.patch.annotation.StringCollectionPatch;
 import software.plusminus.patch.exception.PatchException;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
 
+@Component
+@Order(Ordered.LOWEST_PRECEDENCE - 2)
 public class StringCollectionElementPatcher implements CollectionElementPatcher {
 
     @Nullable
@@ -21,7 +26,12 @@ public class StringCollectionElementPatcher implements CollectionElementPatcher 
             return null;
         }
 
-        return String.class.cast(element).split(annotation.splitter())[annotation.index()];
+        String[] parts = String.class.cast(element).split(annotation.splitter());
+        if (annotation.index() >= parts.length) {
+            throw new PatchException("Cannot extract key with index " + annotation.index()
+                    + " from element '" + element + "' using splitter '" + annotation.splitter() + "'");
+        }
+        return parts[annotation.index()];
     }
 
     @Nullable
