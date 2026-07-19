@@ -6,17 +6,15 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import software.plusminus.data.repository.DataRepository;
 import software.plusminus.sync.EntityWithUuid;
-import software.plusminus.test.IntegrationTest;
+import software.plusminus.sync.SyncIntegrationTest;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import static software.plusminus.check.Checks.check;
 
-public class ByUuidFinderTest extends IntegrationTest {
-    
-    @Autowired
-    private ByUuidFinder finder;
+public class ByUuidFinderTest extends SyncIntegrationTest {
+
     @Autowired
     private DataRepository repository;
     
@@ -40,14 +38,14 @@ public class ByUuidFinderTest extends IntegrationTest {
     
     @Test
     public void fetchEntityByUuid() {
-        Optional<EntityWithUuid> fetched = finder.find(entity);
+        Optional<EntityWithUuid> fetched = byUuidFinder().find(entity);
         check(fetched).isNotEmpty().isLike(entity);
     }
     
     @Test
     public void fetchMissedUuid() {
         entity.setUuid(UUID.randomUUID());
-        Optional<EntityWithUuid> fetched = finder.find(entity);
+        Optional<EntityWithUuid> fetched = byUuidFinder().find(entity);
         check(fetched).isEmpty();
     }
 

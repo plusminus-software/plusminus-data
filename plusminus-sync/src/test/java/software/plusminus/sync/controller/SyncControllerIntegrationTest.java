@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -14,18 +13,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import software.plusminus.audit.context.DeviceContext;
 import software.plusminus.check.util.JsonUtil;
 import software.plusminus.data.service.DataService;
-import software.plusminus.jwt.service.IssuerContext;
 import software.plusminus.security.Security;
+import software.plusminus.sync.SyncIntegrationTest;
 import software.plusminus.sync.TestEntity;
 import software.plusminus.sync.dto.Sync;
 import software.plusminus.sync.dto.SyncType;
 import software.plusminus.sync.models.Product;
 import software.plusminus.sync.models.ProductOutcome;
-import software.plusminus.tenant.context.TenantContext;
-import software.plusminus.test.IntegrationTest;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +35,7 @@ import static org.mockito.Mockito.doReturn;
 import static software.plusminus.check.Checks.check;
 
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
-public class SyncControllerIntegrationTest extends IntegrationTest {
+public class SyncControllerIntegrationTest extends SyncIntegrationTest {
 
     private static final String TENANT = "localhost";
     private static final String CURRENT_DEVICE = "CurrentDevice";
@@ -52,12 +48,6 @@ public class SyncControllerIntegrationTest extends IntegrationTest {
     private ObjectMapper objectMapper;
     @Autowired
     private DataService dataService;
-    @SpyBean
-    private DeviceContext deviceContext;
-    @SpyBean
-    private TenantContext tenantContext;
-    @SpyBean
-    private IssuerContext issuerContext;
 
     private TestEntity entity1;
     private TestEntity entity2;
@@ -69,7 +59,7 @@ public class SyncControllerIntegrationTest extends IntegrationTest {
 
     @Before
     public void before() {
-        doReturn(TENANT).when(issuerContext).get();
+        doReturn(TENANT).when(issuerContext()).get();
 
         entity1 = readTestEntity();
         entity1.setId(null);
@@ -267,10 +257,10 @@ public class SyncControllerIntegrationTest extends IntegrationTest {
     }
 
     private void run(String tenant, String device, Runnable runnable) {
-        doReturn(device).when(deviceContext).get();
-        doReturn(tenant).when(tenantContext).get();
+        doReturn(device).when(deviceContext()).get();
+        doReturn(tenant).when(tenantContext()).get();
         data().transaction().run(runnable);
-        doCallRealMethod().when(tenantContext).get();
-        doCallRealMethod().when(deviceContext).get();
+        doCallRealMethod().when(tenantContext()).get();
+        doCallRealMethod().when(deviceContext()).get();
     }
 }

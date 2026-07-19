@@ -1,22 +1,18 @@
 package software.plusminus.sync.service;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.util.AopTestUtils;
 import software.plusminus.data.repository.DataRepository;
-import software.plusminus.data.service.DataService;
 import software.plusminus.json.model.ApiObject;
 import software.plusminus.sync.InnerEntity;
+import software.plusminus.sync.SyncIntegrationTest;
 import software.plusminus.sync.TestEntity;
 import software.plusminus.sync.TransactionalService;
 import software.plusminus.sync.dto.Sync;
 import software.plusminus.sync.dto.SyncType;
 import software.plusminus.sync.models.Product;
 import software.plusminus.sync.models.ProductOutcome;
-import software.plusminus.test.IntegrationTest;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,11 +20,10 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static software.plusminus.check.Checks.check;
 
-public class AuditSyncServiceIntegrationTest extends IntegrationTest {
+public class AuditSyncServiceIntegrationTest extends SyncIntegrationTest {
 
     @Autowired
     private AuditSyncService syncService;
@@ -36,19 +31,6 @@ public class AuditSyncServiceIntegrationTest extends IntegrationTest {
     private DataRepository dataRepository;
     @Autowired
     private TransactionalService transactionalService;
-    @SpyBean
-    private DataService dataService;
-
-    /* DataService is @Transactional, so its bean is an AOP proxy around the spy.
-       Spring Boot 2.2 can't resolve a mock through the proxy, so it never resets it between tests. */
-    @Before
-    public void resetDataService() {
-        reset(dataService());
-    }
-
-    private DataService dataService() {
-        return AopTestUtils.getUltimateTargetObject(dataService);
-    }
 
     @Test
     public void createObjectWithInnerEntity() {
@@ -62,8 +44,8 @@ public class AuditSyncServiceIntegrationTest extends IntegrationTest {
                 Sync.of(product, SyncType.CREATE, null, null)));
         
         assertThat(result).asList().containsExactly(productOutcome, product);
-        verify(dataService()).create(product);
-        verify(dataService()).create(productOutcome);
+        verify(dataServiceSpy()).create(product);
+        verify(dataServiceSpy()).create(productOutcome);
         transactionalService.inTransaction(() -> {
             check(result.get(0))
                     .isInstanceOf(ProductOutcome.class)
@@ -129,7 +111,7 @@ public class AuditSyncServiceIntegrationTest extends IntegrationTest {
         Product resultProduct = (Product) result.get(0); 
         assertThat(resultProduct.getId()).isEqualTo(productIndDb.getId());
         assertThat(resultProduct.getVersion()).isEqualTo(1L);
-        verify(dataService()).update(product);
+        verify(dataServiceSpy()).update(product);
     }
     
     @Test

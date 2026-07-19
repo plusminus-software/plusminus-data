@@ -3,17 +3,13 @@ package software.plusminus.sync.dehydration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import software.plusminus.data.service.DataService;
-import software.plusminus.jwt.service.IssuerContext;
 import software.plusminus.security.Security;
-import software.plusminus.tenant.context.TenantContext;
-import software.plusminus.test.IntegrationTest;
+import software.plusminus.sync.SyncIntegrationTest;
 import software.plusminus.util.ResourceUtils;
 
 import java.time.Duration;
@@ -25,16 +21,10 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static software.plusminus.check.Checks.check;
 
-class DehydrationIntegrationTest extends IntegrationTest {
+class DehydrationIntegrationTest extends SyncIntegrationTest {
 
     @Autowired
-    private DataService dataService;
-    @Autowired
     private RestTemplateBuilder restTemplateBuilder;
-    @SpyBean
-    private TenantContext tenantContext;
-    @SpyBean
-    private IssuerContext issuerContext;
 
     private A entityA;
     private B entityB;
@@ -44,7 +34,7 @@ class DehydrationIntegrationTest extends IntegrationTest {
     @BeforeEach
     public void beforeEach() {
         super.beforeEach();
-        doReturn("localhost").when(issuerContext).get();
+        doReturn("localhost").when(issuerContext()).get();
         entityA = new A();
         entityA.setName("a");
         entityA.setUuid(UUID.randomUUID());
@@ -58,10 +48,10 @@ class DehydrationIntegrationTest extends IntegrationTest {
         entityA.setEntityC(entityC);
         entityB.setEntityA(entityA);
 
-        doReturn("localhost").when(tenantContext).get();
+        doReturn("localhost").when(tenantContext()).get();
         data().transaction().run(() ->
-                Stream.of(entityA, entityB, entityC).forEach(dataService::create));
-        doCallRealMethod().when(tenantContext).get();
+                Stream.of(entityA, entityB, entityC).forEach(dataService()::create));
+        doCallRealMethod().when(tenantContext()).get();
     }
 
     @Test
