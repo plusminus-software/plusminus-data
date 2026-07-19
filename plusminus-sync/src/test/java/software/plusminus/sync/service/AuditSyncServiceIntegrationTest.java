@@ -4,9 +4,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.util.AopTestUtils;
 import software.plusminus.data.repository.DataRepository;
 import software.plusminus.data.service.DataService;
+import software.plusminus.json.model.ApiObject;
 import software.plusminus.sync.InnerEntity;
 import software.plusminus.sync.TestEntity;
 import software.plusminus.sync.TransactionalService;
@@ -19,6 +21,7 @@ import software.plusminus.test.IntegrationTest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.reset;
@@ -129,6 +132,30 @@ public class AuditSyncServiceIntegrationTest extends IntegrationTest {
         verify(dataService()).update(product);
     }
     
+    @Test
+    public void secondReadReturnsSameBackFilledUuid() {
+        Product product = new Product();
+        product.setName("uuid back-fill");
+        transactionalService.inTransaction(() -> dataRepository.save(product));
+
+        UUID firstUuid = readSingleProductUuid();
+        UUID secondUuid = readSingleProductUuid();
+
+        assertThat(firstUuid).isNotNull();
+        assertThat(secondUuid).isEqualTo(firstUuid);
+    }
+
+    private UUID readSingleProductUuid() {
+        List<Sync<? extends ApiObject>> syncs = syncService.read(
+                Collections.singletonList("Product"), false, 0L, 10, Sort.Direction.ASC);
+        return syncs.stream()
+                .map(Sync::getObject)
+                .filter(Product.class::isInstance)
+                .map(o -> ((Product) o).getUuid())
+                .findFirst()
+                .orElse(null);
+    }
+
     @Test
     public void updateTwoObjectsWithSameInnerEntity() {
         InnerEntity innerEntity = new InnerEntity();

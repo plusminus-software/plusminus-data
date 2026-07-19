@@ -36,6 +36,9 @@ public class BeanIdResolver extends TypeIdResolverBase {
             return superType;
         }
         Class<?> subclass = MetadataContext.getClass(id);
+        if (subclass == null) {
+            throw new IllegalArgumentException("Unknown type id: " + id);
+        }
         subclass = reloadWithClassLoaderIfNeeded(superType.getRawClass().getClassLoader(), subclass);
         return context.constructSpecializedType(superType, subclass);
     }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.DispatcherServlet;
 import software.plusminus.data.model.Create;
 import software.plusminus.data.model.Delete;
@@ -40,15 +41,23 @@ public class DataController {
     @GetMapping("{type}/{id}")
     public <T, ID> T get(@PathVariable String type,
                          @PathVariable ID id) {
-        Class<T> clazz = MetadataContext.getClass(type);
+        Class<T> clazz = resolveClass(type);
         return service.getById(clazz, id);
     }
 
     @GetMapping("{type}")
     public <T> Page<T> getPage(@PathVariable String type,
                                @PageableDefault(direction = Sort.Direction.DESC) Pageable pageable) {
-        Class<T> clazz = MetadataContext.getClass(type);
+        Class<T> clazz = resolveClass(type);
         return service.getPage(clazz, pageable);
+    }
+
+    private <T> Class<T> resolveClass(String type) {
+        Class<T> clazz = MetadataContext.getClass(type);
+        if (clazz == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown type: " + type);
+        }
+        return clazz;
     }
 
     @PostMapping

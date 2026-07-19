@@ -8,6 +8,7 @@ import software.plusminus.metadata.MetadataContext;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class BeanIdResolverTest {
 
@@ -39,6 +40,13 @@ public class BeanIdResolverTest {
         assertThat(entity.getClass()).isEqualTo(BeanIdBaseEntity.class);
     }
     
+    @Test
+    public void unmarshallingOfUnknownTypeThrows() {
+        assertThatThrownBy(() -> mapper.readValue(getJson("UnknownType"), BeanIdBaseEntity.class))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unknown type id");
+    }
+
     private String getJson(String className) {
         return "{\"class\":\"" + className + "\",\"field\":\"value\"}";
     }

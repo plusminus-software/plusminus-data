@@ -38,8 +38,10 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -118,6 +120,19 @@ public class AuditSyncServiceTest {
                 Sync.of(deleted, SyncType.DELETE, 7L, null));
     }
     
+    @Test
+    public void readExcludingCurrentDeviceWithoutDeviceContextThrowsException() {
+        when(deviceContext.get()).thenReturn(null);
+        when(entityService.findClass("Type1")).thenReturn((Class) TestEntity.class);
+
+        Throwable thrown = catchThrowable(() -> syncService.read(
+                Collections.singletonList("Type1"), true, 4L, 3, Sort.Direction.DESC));
+
+        assertThat(thrown).isInstanceOf(SyncException.class)
+                .hasMessageContaining("device is missed");
+        verifyZeroInteractions(auditLogRepository);
+    }
+
     @Test(expected = SyncException.class)
     public void readIncorrectEntity() {
         when(entityService.findClass("Type1")).thenReturn((Class) NoAnnotationsEntity.class);

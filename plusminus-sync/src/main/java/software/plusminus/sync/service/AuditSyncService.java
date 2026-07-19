@@ -53,7 +53,7 @@ public class AuditSyncService implements SyncService {
     private List<SyncPostListener> postListeners = Collections.emptyList();
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Sync<? extends ApiObject>> read(List<String> types, boolean excludeCurrentDevice,
                                                 Long offset, Integer size,
                                                 Sort.Direction direction) {
@@ -68,6 +68,9 @@ public class AuditSyncService implements SyncService {
         Page<AuditLog<? extends ApiObject>> page;
         if (excludeCurrentDevice) {
             String ignoreDevice = deviceContext.get();
+            if (ignoreDevice == null) {
+                throw new SyncException("Can't exclude current device: device is missed in the security context");
+            }
             page = auditLogRepository.findByEntityTypeInAndDeviceIsNotAndNumberGreaterThanAndCurrentTrue(
                     types, ignoreDevice, offset, pageable);
         } else {

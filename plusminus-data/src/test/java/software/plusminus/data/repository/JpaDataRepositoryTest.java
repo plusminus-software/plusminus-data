@@ -12,11 +12,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.server.ResponseStatusException;
 import software.plusminus.check.util.JsonUtil;
 import software.plusminus.data.event.DataEventPublisher;
 import software.plusminus.data.fixtures.TestEntity;
 import software.plusminus.data.fixtures.TestUtil;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static software.plusminus.check.Checks.check;
 
 @RunWith(SpringRunner.class)
@@ -56,6 +58,13 @@ public class JpaDataRepositoryTest {
                 Sort.by(Sort.Direction.DESC, "id")));
 
         TestUtil.checkPages(page1, page2, page3);
+    }
+
+    @Test
+    public void findAllWithUnknownSortPropertyThrowsBadRequest() {
+        assertThatThrownBy(() -> repository.findAll(TestEntity.class,
+                PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "unknownProperty"))))
+                .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test

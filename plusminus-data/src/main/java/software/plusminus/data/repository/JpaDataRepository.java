@@ -1,34 +1,34 @@
 package software.plusminus.data.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import software.plusminus.data.event.DataEventPublisher;
 import software.plusminus.util.EntityUtils;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("java:S119")
+@AllArgsConstructor
 @Repository
 @ConditionalOnClass(JpaRepository.class)
 public class JpaDataRepository implements DataRepository {
 
-    @PersistenceContext
     private EntityManager entityManager;
-    @Autowired
     private DataEventPublisher publisher;
 
     @Override
@@ -85,11 +85,16 @@ public class JpaDataRepository implements DataRepository {
         if (!pageable.getSort().isSorted()) {
             return;
         }
-        List<Order> orders = pageable.getSort().stream()
-                .map(order -> order.isAscending()
-                        ? builder.asc(root.get(order.getProperty()))
-                        : builder.desc(root.get(order.getProperty())))
-                .collect(Collectors.toList());
+        List<Order> orders;
+        try {
+            orders = pageable.getSort().stream()
+                    .map(order -> order.isAscending()
+                            ? builder.asc(root.get(order.getProperty()))
+                            : builder.desc(root.get(order.getProperty())))
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown sort property", e);
+        }
         query.orderBy(orders);
     }
 
