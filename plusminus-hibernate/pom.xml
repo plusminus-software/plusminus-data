@@ -20,6 +20,11 @@
         </dependency>
         <dependency>
             <groupId>software.plusminus</groupId>
+            <artifactId>plusminus-scope</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>software.plusminus</groupId>
             <artifactId>plusminus-http</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
