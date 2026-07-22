@@ -13,12 +13,14 @@ import software.plusminus.tenant.annotation.Tenant;
 import software.plusminus.tenant.context.TenantContext;
 import software.plusminus.tenant.exception.NotFoundException;
 import software.plusminus.tenant.exception.TenantException;
+import software.plusminus.util.EntityUtils;
 import software.plusminus.util.FieldUtils;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
+import javax.persistence.EntityManager;
 
 @AllArgsConstructor
 @Component
@@ -27,6 +29,7 @@ public class TenantListener {
     private static final ThreadLocal<Boolean> DISABLE = new ThreadLocal<>();
 
     private TenantContext tenantContext;
+    private EntityManager entityManager;
 
     @EventListener
     public void onCreate(BeforeCreateEvent<?> event) {
@@ -64,10 +67,7 @@ public class TenantListener {
         String contextTenant = tenantContext.get();
         if (objectTenant == null && contextTenant != null && action != CrudAction.READ) {
             FieldUtils.write(object, contextTenant, field);
-            return;
-        }
-        //TODO check that entity in DB has the same tenant
-        if (!Objects.equals(safeString(objectTenant), safeString(contextTenant))) {
+        } else if (!Objects.equals(safeString(objectTenant), safeString(contextTenant))) {
             if (action == CrudAction.READ) {
                 throw new NotFoundException();
             }
@@ -75,6 +75,24 @@ public class TenantListener {
                     + " on object " + object
                     + " with tenant '" + objectTenant
                     + "' as the current tenant is '" + contextTenant + "'");
+        }
+        if (action == CrudAction.UPDATE || action == CrudAction.DELETE) {
+            checkTenantInDatabase(object, field, contextTenant);
+        }
+    }
+
+    private void checkTenantInDatabase(Object object, Field field, @Nullable String contextTenant) {
+        Object id = EntityUtils.findId(object);
+        if (id == null) {
+            return;
+        }
+        Object inDatabase = entityManager.find(object.getClass(), id);
+        if (inDatabase == null) {
+            return;
+        }
+        String databaseTenant = FieldUtils.read(inDatabase, String.class, field);
+        if (!Objects.equals(safeString(databaseTenant), safeString(contextTenant))) {
+            throw new NotFoundException();
         }
     }
 

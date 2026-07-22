@@ -124,17 +124,21 @@ class TenantListenerTest extends IntegrationTest {
 
     @ParameterizedTest
     @CsvSource({
-        "firstTenant,firstTenant,firstTenant,false",
-        "secondTenant,firstTenant,,true",
-        ",firstTenant,,false", //TODO check that entity in DB has the same tenant
-        ",,,false"
+        "firstTenant,firstTenant,firstTenant,firstTenant,OK",
+        "firstTenant,,firstTenant,firstTenant,OK",
+        "secondTenant,secondTenant,firstTenant,,BAD_REQUEST",
+        "secondTenant,firstTenant,firstTenant,,NOT_FOUND",
+        ",,firstTenant,,NOT_FOUND",
+        ",,,,OK"
     })
-    void update(String objectTenant, String contextTenant, String expectedTenant, boolean error) {
+    void update(String databaseTenant, String sentTenant, String contextTenant,
+                String expectedTenant, HttpStatus expectedStatus) {
         TestEntity entity = new TestEntity();
         entity.setMyField("first");
-        entity.setTenant(objectTenant);
+        entity.setTenant(databaseTenant);
         tenantListener.runWithoutTenantCheck(() -> repository.save(entity));
         entity.setMyField("updated");
+        entity.setTenant(sentTenant);
         when(firstProvider.currentTenant()).thenReturn(contextTenant);
 
         ResponseEntity<TestEntity> response = restTemplate.exchange(
@@ -144,20 +148,48 @@ class TenantListenerTest extends IntegrationTest {
                 TestEntity.class
         );
 
-        if (error) {
-            check(response.getStatusCode()).is(HttpStatus.BAD_REQUEST);
-            check(repository.count()).is(1);
-            return;
-        }
-        check(response.getStatusCode()).is(HttpStatus.OK);
+        check(response.getStatusCode()).is(expectedStatus);
         check(repository.count()).is(1);
         TestEntity saved = tenantListener.callWithoutTenantCheck(
                 () -> repository.findAll().iterator().next());
+        if (expectedStatus != HttpStatus.OK) {
+            check(saved.getMyField()).is("first");
+            check(saved.getTenant()).is(databaseTenant);
+            return;
+        }
         check(saved.getMyField()).is("updated");
         check(saved.getTenant()).is(expectedTenant);
         check(response.getBody()).isNotNull();
         check(response.getBody().getMyField()).is("updated");
         check(response.getBody().getTenant()).is(contextTenant);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "firstTenant,firstTenant,firstTenant,NO_CONTENT",
+        "firstTenant,,firstTenant,NO_CONTENT",
+        "secondTenant,secondTenant,firstTenant,BAD_REQUEST",
+        "secondTenant,firstTenant,firstTenant,NOT_FOUND",
+        ",,firstTenant,NOT_FOUND",
+        ",,,NO_CONTENT"
+    })
+    void delete(String databaseTenant, String sentTenant, String contextTenant, HttpStatus expectedStatus) {
+        TestEntity entity = new TestEntity();
+        entity.setMyField("first");
+        entity.setTenant(databaseTenant);
+        tenantListener.runWithoutTenantCheck(() -> repository.save(entity));
+        entity.setTenant(sentTenant);
+        when(firstProvider.currentTenant()).thenReturn(contextTenant);
+
+        ResponseEntity<Void> response = restTemplate.exchange(
+                web().url() + "/test",
+                HttpMethod.DELETE,
+                new HttpEntity<>(entity),
+                Void.class
+        );
+
+        check(response.getStatusCode()).is(expectedStatus);
+        check(repository.count()).is(expectedStatus == HttpStatus.NO_CONTENT ? 0 : 1);
     }
 
     @ParameterizedTest
