@@ -2,10 +2,12 @@ package software.plusminus.tenant.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import software.plusminus.data.event.BeforeCreateEvent;
 import software.plusminus.data.event.BeforeDeleteEvent;
 import software.plusminus.data.event.BeforeUpdateEvent;
+import software.plusminus.data.event.CrudAction;
 import software.plusminus.data.event.ReadEvent;
 import software.plusminus.tenant.annotation.Tenant;
 import software.plusminus.tenant.context.TenantContext;
@@ -14,6 +16,7 @@ import software.plusminus.tenant.exception.TenantException;
 import software.plusminus.util.FieldUtils;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -27,34 +30,25 @@ public class TenantListener {
 
     @EventListener
     public void onCreate(BeforeCreateEvent<?> event) {
-        applyOnWrite(event.getEntity(), true);
+        onAction(event.getEntity(), CrudAction.CREATE);
     }
 
     @EventListener
     public void onUpdate(BeforeUpdateEvent<?> event) {
-        applyOnWrite(event.getEntity(), false);
+        onAction(event.getEntity(), CrudAction.UPDATE);
     }
 
     @EventListener
     public void onDelete(BeforeDeleteEvent<?> event) {
-        applyOnWrite(event.getEntity(), false);
+        onAction(event.getEntity(), CrudAction.DELETE);
     }
 
     @EventListener
     public void onRead(ReadEvent<?> event) {
-        Object object = event.getEntity();
-        if (isDisabled()) {
-            return;
-        }
-        Optional<Field> field = FieldUtils.findFirstWithAnnotation(object.getClass(), Tenant.class);
-        if (!field.isPresent()) {
-            return;
-        }
-        String objectTenant = FieldUtils.read(object, String.class, field.get());
-        checkAccess(objectTenant, tenantContext.get(), true);
+        onAction(event.getEntity(), CrudAction.READ);
     }
 
-    private void applyOnWrite(Object object, boolean create) {
+    private void onAction(Object object, CrudAction action) {
         if (isDisabled()) {
             return;
         }
@@ -62,25 +56,30 @@ public class TenantListener {
         if (!field.isPresent()) {
             return;
         }
-        String objectTenant = FieldUtils.read(object, String.class, field.get());
+        checkAccess(object, field.get(), action);
+    }
+
+    private void checkAccess(Object object, Field field, CrudAction action) {
+        String objectTenant = FieldUtils.read(object, String.class, field);
         String contextTenant = tenantContext.get();
-        if (objectTenant == null && contextTenant != null && create) {
-            FieldUtils.write(object, contextTenant, field.get());
+        if (objectTenant == null && contextTenant != null && action != CrudAction.READ) {
+            FieldUtils.write(object, contextTenant, field);
             return;
         }
-        checkAccess(objectTenant, contextTenant, false);
-    }
-
-    private void checkAccess(String objectTenant, String contextTenant, boolean read) {
-        String object = objectTenant == null ? "" : objectTenant;
-        String context = contextTenant == null ? "" : contextTenant;
-        if (!object.equals(context)) {
-            if (read) {
+        //TODO check that entity in DB has the same tenant
+        if (!Objects.equals(safeString(objectTenant), safeString(contextTenant))) {
+            if (action == CrudAction.READ) {
                 throw new NotFoundException();
             }
-            throw new TenantException("Cannot perform action on object with tenant '" + object
-                    + "' as the current tenant is '" + context + "'");
+            throw new TenantException("Cannot perform action " + action
+                    + " on object " + object
+                    + " with tenant '" + objectTenant
+                    + "' as the current tenant is '" + contextTenant + "'");
         }
+    }
+
+    private String safeString(@Nullable String string) {
+        return string == null ? "" : string;
     }
 
     private boolean isDisabled() {

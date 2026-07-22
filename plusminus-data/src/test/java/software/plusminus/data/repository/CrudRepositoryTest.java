@@ -13,11 +13,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import software.plusminus.check.util.JsonUtil;
+import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.data.fixtures.TestCrudRepository;
 import software.plusminus.data.fixtures.TestEntity;
 import software.plusminus.data.fixtures.TestUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static software.plusminus.check.Checks.check;
@@ -57,16 +59,39 @@ public class CrudRepositoryTest {
         check(result).is(entities.get(1));
     }
 
-    @Test
+    @Test(expected = NotFoundException.class)
     public void getById_ForMissed() {
         List<TestEntity> entities = readEntities();
         entities.stream()
                 .peek(entity -> entity.setId(null))
                 .forEach(entityManager::persist);
 
-        TestEntity result = repository.getById(321L);
+        repository.getById(321L);
+    }
 
-        assertThat(result).isNull();
+    @Test
+    public void findById() {
+        List<TestEntity> entities = readEntities();
+        entities.stream()
+                .peek(entity -> entity.setId(null))
+                .forEach(entityManager::persist);
+
+        Optional<TestEntity> result = repository.findById(2L);
+
+        assertThat(result).isPresent();
+        check(result.get()).is(entities.get(1));
+    }
+
+    @Test
+    public void findById_ForMissed() {
+        List<TestEntity> entities = readEntities();
+        entities.stream()
+                .peek(entity -> entity.setId(null))
+                .forEach(entityManager::persist);
+
+        Optional<TestEntity> result = repository.findById(321L);
+
+        assertThat(result).isNotPresent();
     }
 
     @Test

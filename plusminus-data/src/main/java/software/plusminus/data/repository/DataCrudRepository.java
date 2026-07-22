@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 
 @SuppressWarnings("java:S119")
 @AllArgsConstructor
@@ -18,10 +18,9 @@ public class DataCrudRepository<T, ID> implements CrudRepository<T, ID> {
         return dataRepository.save(entity);
     }
 
-    @Nullable
     @Override
-    public T getById(ID id) {
-        return dataRepository.getById(type, id);
+    public Optional<T> findById(ID id) {
+        return Optional.ofNullable(dataRepository.getById(type, id));
     }
 
     @Override

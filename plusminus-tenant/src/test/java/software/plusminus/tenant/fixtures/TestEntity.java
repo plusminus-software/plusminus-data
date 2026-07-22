@@ -6,6 +6,7 @@ import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 import software.plusminus.tenant.annotation.Tenant;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,6 +23,7 @@ public class TestEntity {
     private Long id;
     
     @Tenant
+    @Column(updatable = false)
     private String tenant;
 
     private String myField;

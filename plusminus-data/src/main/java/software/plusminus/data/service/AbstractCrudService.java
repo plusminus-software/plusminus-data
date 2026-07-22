@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.data.model.Update;
 import software.plusminus.data.repository.CrudRepository;
 import software.plusminus.data.repository.RepositoryContext;
@@ -57,11 +56,7 @@ public abstract class AbstractCrudService<T, ID> implements CrudService<T, ID> {
         if (self != null && !TransactionSynchronizationManager.isActualTransactionActive()) {
             return self.getById(id);
         }
-        T object = repository.getById(id);
-        if (object == null) {
-            throw new NotFoundException("Can't find object with id " + id);
-        }
-        return object;
+        return repository.getById(id);
     }
 
     @Override

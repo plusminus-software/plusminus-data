@@ -126,7 +126,7 @@ class TenantListenerTest extends IntegrationTest {
     @CsvSource({
         "firstTenant,firstTenant,firstTenant,false",
         "secondTenant,firstTenant,,true",
-        ",firstTenant,,true",
+        ",firstTenant,,false", //TODO check that entity in DB has the same tenant
         ",,,false"
     })
     void update(String objectTenant, String contextTenant, String expectedTenant, boolean error) {
@@ -151,12 +151,13 @@ class TenantListenerTest extends IntegrationTest {
         }
         check(response.getStatusCode()).is(HttpStatus.OK);
         check(repository.count()).is(1);
-        TestEntity saved = repository.findAll().iterator().next();
+        TestEntity saved = tenantListener.callWithoutTenantCheck(
+                () -> repository.findAll().iterator().next());
         check(saved.getMyField()).is("updated");
         check(saved.getTenant()).is(expectedTenant);
         check(response.getBody()).isNotNull();
         check(response.getBody().getMyField()).is("updated");
-        check(response.getBody().getTenant()).is(expectedTenant);
+        check(response.getBody().getTenant()).is(contextTenant);
     }
 
     @ParameterizedTest

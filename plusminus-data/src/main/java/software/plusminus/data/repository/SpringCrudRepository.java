@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 
 @SuppressWarnings("java:S119")
 @AllArgsConstructor
@@ -18,11 +18,9 @@ public class SpringCrudRepository<T, ID> implements CrudRepository<T, ID> {
         return repository.save(entity);
     }
 
-    @Nullable
     @Override
-    public T getById(ID id) {
-        return repository.findById(id)
-                .orElse(null);
+    public Optional<T> findById(ID id) {
+        return repository.findById(id);
     }
 
     @Override

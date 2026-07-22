@@ -27,6 +27,7 @@
             <groupId>software.plusminus</groupId>
             <artifactId>plusminus-http</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <scope>runtime</scope>
         </dependency>
         <!-- Test -->
         <dependency>

@@ -30,10 +30,8 @@ class DehydrationIntegrationTest extends SyncIntegrationTest {
     private B entityB;
     private C entityC;
 
-    @Override
     @BeforeEach
-    public void beforeEach() {
-        super.beforeEach();
+    void beforeEach() {
         doReturn("localhost").when(issuerContext()).get();
         entityA = new A();
         entityA.setName("a");

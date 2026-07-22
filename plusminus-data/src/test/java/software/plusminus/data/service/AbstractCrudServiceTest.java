@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 import software.plusminus.check.util.JsonUtil;
 import software.plusminus.data.exception.ClientDataException;
-import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.data.fixtures.TestEntity;
 import software.plusminus.data.model.Update;
 import software.plusminus.data.repository.CrudRepository;
@@ -62,12 +61,6 @@ public class AbstractCrudServiceTest {
         TestEntity result = crudService.getById(2L);
 
         assertThat(result).isSameAs(entity);
-    }
-
-    @Test(expected = NotFoundException.class)
-    public void readById_NotFoundException() {
-        when(repository.getById(2L)).thenReturn(null);
-        crudService.getById(2L);
     }
 
     @Test

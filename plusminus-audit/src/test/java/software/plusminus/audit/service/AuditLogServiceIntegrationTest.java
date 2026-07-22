@@ -1,6 +1,6 @@
 package software.plusminus.audit.service;
 
-import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -42,19 +42,13 @@ public class AuditLogServiceIntegrationTest extends IntegrationTest {
 
     private UUID transactionId = UUID.fromString("3a37e67d-a8b2-4c35-9e6f-a4e4b686ffb5");
 
-    @Override
+    @Before
     public void beforeEach() {
-        super.beforeEach();
         when(deviceContext.optional()).thenReturn(Optional.of("TestDevice"));
         when(transactionIdProvider.currentTransactionId()).thenReturn(transactionId);
         security().login(Security.builder()
                 .username("TestUser")
                 .build());
-    }
-
-    @After
-    public void after() {
-        context().clear();
     }
 
     @Test
