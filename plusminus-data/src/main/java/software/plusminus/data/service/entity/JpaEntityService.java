@@ -1,5 +1,7 @@
 package software.plusminus.data.service.entity;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import software.plusminus.data.exception.NotFoundException;
 import software.plusminus.util.FieldUtils;
@@ -20,6 +22,7 @@ import javax.persistence.metamodel.ManagedType;
 
 @SuppressWarnings("java:S119")
 @Service
+@ConditionalOnClass(JpaRepository.class)
 public class JpaEntityService implements EntityService {
 
     @PersistenceContext
