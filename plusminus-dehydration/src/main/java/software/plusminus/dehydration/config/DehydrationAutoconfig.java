@@ -10,22 +10,24 @@ import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter;
 import com.voodoodyne.jackson.jsog.JSOGRefSerializer;
 import lombok.AllArgsConstructor;
-import org.hibernate.proxy.HibernateProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import software.plusminus.dehydration.DehydrationContext;
 import software.plusminus.dehydration.DehydrationSerializer;
 import software.plusminus.util.AnnotationUtils;
+import software.plusminus.util.ClassUtils;
 import software.plusminus.util.FieldUtils;
 
 import java.lang.reflect.Field;
-import javax.persistence.Entity;
 
 @Configuration
 @AllArgsConstructor
 @ComponentScan("software.plusminus.dehydration")
 public class DehydrationAutoconfig {
+
+    private static final String HIBERNATE_PROXY_INTERFACE = "org.hibernate.proxy.HibernateProxy";
+    private static final String ENTITY_ANNOTATION = "Entity";
 
     private DehydrationContext dehydrationContext;
 
@@ -40,10 +42,10 @@ public class DehydrationAutoconfig {
                     public JsonSerializer<?> modifySerializer(
                             SerializationConfig config, BeanDescription desc, JsonSerializer<?> serializer) {
                         Class<?> beanClass = desc.getBeanClass();
-                        if (HibernateProxy.class.isAssignableFrom(beanClass)) {
+                        if (isHibernateProxy(beanClass)) {
                             beanClass = beanClass.getSuperclass();
                         }
-                        if (AnnotationUtils.findAnnotation(Entity.class, beanClass) != null
+                        if (AnnotationUtils.findAnnotation(ENTITY_ANNOTATION, beanClass) != null
                                 && serializer instanceof BeanSerializer) {
                             BeanSerializer beanSerializer = (BeanSerializer) serializer;
                             fixBugWithJsog(beanSerializer);
@@ -54,6 +56,11 @@ public class DehydrationAutoconfig {
                 });
             }
         });
+    }
+
+    private boolean isHibernateProxy(Class<?> type) {
+        return ClassUtils.getHierarchyWithInterfaces(type).stream()
+                .anyMatch(c -> c.getName().equals(HIBERNATE_PROXY_INTERFACE));
     }
 
     private void fixBugWithJsog(BeanSerializer serializer) {
