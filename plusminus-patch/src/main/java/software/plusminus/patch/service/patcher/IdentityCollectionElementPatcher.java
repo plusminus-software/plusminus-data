@@ -10,7 +10,7 @@ import java.util.Collection;
 
 @Component
 @Order
-@ConditionalOnProperty("data.patch.collection.identity")
+@ConditionalOnProperty("plusminus.patch.collection.identity")
 public class IdentityCollectionElementPatcher implements CollectionElementPatcher {
 
     @Nullable

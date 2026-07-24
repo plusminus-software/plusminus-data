@@ -37,7 +37,6 @@ public class JpaEntityService implements EntityService {
     }
 
     @Override
-    @Nullable
     public <T> Class<T> findClass(String type) {
         return entityManager.getMetamodel().getManagedTypes().stream()
                 .map(ManagedType::getJavaType)
@@ -55,6 +54,7 @@ public class JpaEntityService implements EntityService {
                 FieldUtils.findFirstWithAnnotation(entityType, org.springframework.data.annotation.Id.class))
                 .filter(Optional::isPresent)
                 .findFirst()
+                .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(Field::getType)
                 .map(type -> (Class<ID>) type)

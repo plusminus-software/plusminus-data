@@ -1,6 +1,7 @@
 package software.plusminus.json.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import org.junit.Test;
 import software.plusminus.json.model.Classable;
 import software.plusminus.metadata.MetadataContext;
@@ -43,7 +44,7 @@ public class BeanIdResolverTest {
     @Test
     public void unmarshallingOfUnknownTypeThrows() {
         assertThatThrownBy(() -> mapper.readValue(getJson("UnknownType"), BeanIdBaseEntity.class))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidTypeIdException.class)
                 .hasMessageContaining("Unknown type id");
     }
 

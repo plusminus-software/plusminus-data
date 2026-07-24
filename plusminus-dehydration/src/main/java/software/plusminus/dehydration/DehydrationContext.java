@@ -27,11 +27,16 @@ public class DehydrationContext {
             runnable.run();
             return;
         }
+        boolean previous = DEHYDRATE.get();
         try {
             DEHYDRATE.set(true);
             runnable.run();
         } finally {
-            DEHYDRATE.set(false);
+            if (previous) {
+                DEHYDRATE.set(true);
+            } else {
+                DEHYDRATE.remove();
+            }
         }
     }
 

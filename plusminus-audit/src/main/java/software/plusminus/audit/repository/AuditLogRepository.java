@@ -32,7 +32,7 @@ public interface AuditLogRepository extends Repository<AuditLog<?>, Long> {
 
     <T> AuditLog<T> save(AuditLog<T> auditLog);
 
-    <T> AuditLog<T> delete(AuditLog<T> auditLog);
+    void delete(AuditLog<?> auditLog);
 
     @Transactional(propagation = Propagation.MANDATORY)
     @Modifying

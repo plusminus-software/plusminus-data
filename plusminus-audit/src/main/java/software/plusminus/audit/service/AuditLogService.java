@@ -160,7 +160,7 @@ public class AuditLogService {
 
     private void processPresentAuditLogOnDelete(AuditLog<?> presentAuditLog) {
         if (presentAuditLog.getAction() == CrudAction.CREATE) {
-            currentAuditLogs.get().remove(presentAuditLog);
+            currentAuditLogs.get().removeIf(auditLog -> auditLog == presentAuditLog);
             repository.delete(presentAuditLog);
         } else if (presentAuditLog.getAction() == CrudAction.UPDATE) {
             presentAuditLog.setAction(CrudAction.DELETE);

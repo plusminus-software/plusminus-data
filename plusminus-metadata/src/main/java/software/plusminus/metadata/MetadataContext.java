@@ -16,7 +16,7 @@ public interface MetadataContext {
 
     static <T> Class<T> getClass(String simpleName) {
         if (AMBIGUOUS_NAMES.contains(simpleName)) {
-            throw new IllegalStateException("Simple class name '" + simpleName
+            throw new AmbiguousTypeException("Simple class name '" + simpleName
                     + "' is ambiguous: multiple classes with this name are registered");
         }
         return (Class<T>) CLASS_MAP.get(simpleName);

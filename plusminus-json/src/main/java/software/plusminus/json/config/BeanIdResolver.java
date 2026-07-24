@@ -3,8 +3,12 @@ package software.plusminus.json.config;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.DatabindContext;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
+import software.plusminus.metadata.AmbiguousTypeException;
 import software.plusminus.metadata.MetadataContext;
+
+import java.io.IOException;
 
 public class BeanIdResolver extends TypeIdResolverBase {
 
@@ -31,13 +35,18 @@ public class BeanIdResolver extends TypeIdResolverBase {
     }
 
     @Override
-    public JavaType typeFromId(DatabindContext context, String id) {
+    public JavaType typeFromId(DatabindContext context, String id) throws IOException {
         if (superType.getRawClass().getSimpleName().equals(id)) {
             return superType;
         }
-        Class<?> subclass = MetadataContext.getClass(id);
+        Class<?> subclass;
+        try {
+            subclass = MetadataContext.getClass(id);
+        } catch (AmbiguousTypeException e) {
+            throw new InvalidTypeIdException(null, e.getMessage(), superType, id);
+        }
         if (subclass == null) {
-            throw new IllegalArgumentException("Unknown type id: " + id);
+            throw new InvalidTypeIdException(null, "Unknown type id: " + id, superType, id);
         }
         subclass = reloadWithClassLoaderIfNeeded(superType.getRawClass().getClassLoader(), subclass);
         return context.constructSpecializedType(superType, subclass);

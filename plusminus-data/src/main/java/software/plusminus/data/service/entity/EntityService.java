@@ -8,7 +8,6 @@ public interface EntityService {
 
     <T> Set<Object> findSubentities(T object);
 
-    @Nullable
     <T> Class<T> findClass(String type);
 
     @Nullable
