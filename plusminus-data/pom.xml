@@ -54,6 +54,11 @@
             <artifactId>plusminus-data-event</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>software.plusminus</groupId>
+            <artifactId>plusminus-dehydration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Test -->
         <dependency>
             <groupId>software.plusminus</groupId>
