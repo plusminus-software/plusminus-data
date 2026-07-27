@@ -20,20 +20,30 @@ public class HibernateFilterService {
     }
     
     public void enableFilters(Session session) {
-        filters.forEach(f -> {
-            Filter filter = session.enableFilter(f.filterName());
-            f.parameters().forEach(filter::setParameter);
-        });
+        filters.stream()
+                .filter(f -> isDefined(session, f.filterName()))
+                .forEach(f -> {
+                    Filter filter = session.enableFilter(f.filterName());
+                    f.parameters().forEach(filter::setParameter);
+                });
     }
-    
+
     public void disableFilters() {
         disableFilters(getSession());
     }
-    
+
     public void disableFilters(Session session) {
-        filters.forEach(f -> session.disableFilter(f.filterName()));
+        filters.stream()
+                .filter(f -> isDefined(session, f.filterName()))
+                .forEach(f -> session.disableFilter(f.filterName()));
     }
-    
+
+    private boolean isDefined(Session session, String filterName) {
+        return session.getSessionFactory()
+                .getDefinedFilterNames()
+                .contains(filterName);
+    }
+
     private Session getSession() {
         return entityManager.unwrap(Session.class);
     }
