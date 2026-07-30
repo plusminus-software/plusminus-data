@@ -2,8 +2,8 @@ package software.plusminus.data.service;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import software.plusminus.data.event.service.TransactionService;
 import software.plusminus.data.fixtures.TimedEntity;
-import software.plusminus.data.fixtures.TransactionService;
 import software.plusminus.test.IntegrationTest;
 
 import java.time.LocalDateTime;

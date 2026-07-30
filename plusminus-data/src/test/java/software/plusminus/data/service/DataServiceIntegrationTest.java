@@ -7,10 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import software.plusminus.check.util.JsonUtil;
+import software.plusminus.data.event.service.TransactionService;
 import software.plusminus.data.fixtures.TestDto;
 import software.plusminus.data.fixtures.TestEntity;
 import software.plusminus.data.fixtures.TestUtil;
-import software.plusminus.data.fixtures.TransactionService;
 import software.plusminus.test.IntegrationTest;
 
 import javax.persistence.EntityManager;

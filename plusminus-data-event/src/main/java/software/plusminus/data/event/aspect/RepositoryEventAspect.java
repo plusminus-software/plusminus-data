@@ -9,14 +9,20 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import software.plusminus.data.event.DataEventPublisher;
+import software.plusminus.data.event.service.TransactionService;
 import software.plusminus.util.EntityUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Publishes data events around Spring Data repository calls.
+ *
+ * <p>Write operations and the events published around them run in a single transaction,
+ * which is started if the caller has none - see {@link TransactionService}. Without spring-tx
+ * on the classpath that bean is absent and the writes proceed as before, untransacted.
  *
  * <p>Bulk operations that receive neither entities nor ids
  * ({@code deleteAll()}, {@code deleteAllInBatch()}, {@code deleteInBatch(...)})
@@ -28,6 +34,7 @@ import java.util.Optional;
 public class RepositoryEventAspect {
 
     private DataEventPublisher publisher;
+    private Optional<TransactionService> transactionService;
 
     @Pointcut("execution(* org.springframework.data.repository.Repository+.save(..)) "
             + "|| execution(* org.springframework.data.repository.Repository+.saveAndFlush(..))")
@@ -71,65 +78,77 @@ public class RepositoryEventAspect {
 
     @Around("save() && args(entity)")
     public Object aroundSave(ProceedingJoinPoint joinPoint, Object entity) {
-        boolean isNew = publishBeforeWrite(entity);
-        Object saved = proceed(joinPoint);
-        publishWrite(saved, isNew);
-        return saved;
+        return inTransaction(() -> {
+            boolean isNew = publishBeforeWrite(entity);
+            Object saved = proceed(joinPoint);
+            publishWrite(saved, isNew);
+            return saved;
+        });
     }
 
     @Around("saveAll() && args(entities)")
     public Object aroundSaveAll(ProceedingJoinPoint joinPoint, Iterable<?> entities) {
-        List<Boolean> newFlags = new ArrayList<>();
-        entities.forEach(entity -> newFlags.add(publishBeforeWrite(entity)));
-        Object saved = proceed(joinPoint);
-        if (saved instanceof Iterable) {
-            int index = 0;
-            for (Object entity : (Iterable<?>) saved) {
-                publishWrite(entity, index < newFlags.size() && newFlags.get(index));
-                index++;
+        return inTransaction(() -> {
+            List<Boolean> newFlags = new ArrayList<>();
+            entities.forEach(entity -> newFlags.add(publishBeforeWrite(entity)));
+            Object saved = proceed(joinPoint);
+            if (saved instanceof Iterable) {
+                int index = 0;
+                for (Object entity : (Iterable<?>) saved) {
+                    publishWrite(entity, index < newFlags.size() && newFlags.get(index));
+                    index++;
+                }
             }
-        }
-        return saved;
+            return saved;
+        });
     }
 
     @Around("delete() && args(entity)")
     public Object aroundDelete(ProceedingJoinPoint joinPoint, Object entity) {
-        publisher.publishBeforeDelete(entity);
-        Object result = proceed(joinPoint);
-        publisher.publishDelete(entity);
-        return result;
+        return inTransaction(() -> {
+            publisher.publishBeforeDelete(entity);
+            Object result = proceed(joinPoint);
+            publisher.publishDelete(entity);
+            return result;
+        });
     }
 
     @Around("deleteAll() && args(entities)")
     public Object aroundDeleteAll(ProceedingJoinPoint joinPoint, Iterable<?> entities) {
-        entities.forEach(publisher::publishBeforeDelete);
-        Object result = proceed(joinPoint);
-        entities.forEach(publisher::publishDelete);
-        return result;
+        return inTransaction(() -> {
+            entities.forEach(publisher::publishBeforeDelete);
+            Object result = proceed(joinPoint);
+            entities.forEach(publisher::publishDelete);
+            return result;
+        });
     }
 
     @Around("deleteById() && args(id)")
     public Object aroundDeleteById(ProceedingJoinPoint joinPoint, Object id) {
-        Object entity = findEntity(joinPoint.getTarget(), id);
-        publisher.publishBeforeDelete(entity);
-        Object result = proceed(joinPoint);
-        publisher.publishDelete(entity);
-        return result;
+        return inTransaction(() -> {
+            Object entity = findEntity(joinPoint.getTarget(), id);
+            publisher.publishBeforeDelete(entity);
+            Object result = proceed(joinPoint);
+            publisher.publishDelete(entity);
+            return result;
+        });
     }
 
     @Around("deleteAllById() && args(ids)")
     public Object aroundDeleteAllById(ProceedingJoinPoint joinPoint, Iterable<?> ids) {
-        List<Object> entities = new ArrayList<>();
-        ids.forEach(id -> {
-            Object entity = findEntity(joinPoint.getTarget(), id);
-            if (entity != null) {
-                entities.add(entity);
-            }
+        return inTransaction(() -> {
+            List<Object> entities = new ArrayList<>();
+            ids.forEach(id -> {
+                Object entity = findEntity(joinPoint.getTarget(), id);
+                if (entity != null) {
+                    entities.add(entity);
+                }
+            });
+            entities.forEach(publisher::publishBeforeDelete);
+            Object result = proceed(joinPoint);
+            entities.forEach(publisher::publishDelete);
+            return result;
         });
-        entities.forEach(publisher::publishBeforeDelete);
-        Object result = proceed(joinPoint);
-        entities.forEach(publisher::publishDelete);
-        return result;
     }
 
     @Around("read()")
@@ -144,6 +163,13 @@ public class RepositoryEventAspect {
     @SneakyThrows
     private Object proceed(ProceedingJoinPoint joinPoint) {
         return joinPoint.proceed();
+    }
+
+    private <T> T inTransaction(Supplier<T> write) {
+        if (!transactionService.isPresent()) {
+            return write.get();
+        }
+        return transactionService.get().run(write);
     }
 
     private boolean publishBeforeWrite(Object entity) {
