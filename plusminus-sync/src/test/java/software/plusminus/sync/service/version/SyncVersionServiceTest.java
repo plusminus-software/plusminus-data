@@ -26,15 +26,15 @@ public class SyncVersionServiceTest {
     public void findVersionField() {
         TestEntity entity = new TestEntity();
         Optional<Field> versionField = versionService.findVersionField(entity);
-        check(versionField).isNotEmpty();
+        check(versionField).isPresent();
         check(versionField.get().getName()).is("version");
     }
-    
+
     @Test
     public void findVersionFieldWithPrimitiveType() {
         EntityWithPrimitiveVersion entity = new EntityWithPrimitiveVersion();
         Optional<Field> versionField = versionService.findVersionField(entity);
-        check(versionField).isNotEmpty();
+        check(versionField).isPresent();
         check(versionField.get().getName()).is("version");
     }
 

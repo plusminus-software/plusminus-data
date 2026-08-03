@@ -81,7 +81,7 @@ public class RepositoryEventAspectIntegrationTest extends IntegrationTest {
 
         Optional<TestEntity> found = repository.findById(saved.getId());
 
-        check(found).isNotEmpty().is(saved);
+        check(found).hasValue(saved);
         check(listener.getRead()).is(saved);
     }
 

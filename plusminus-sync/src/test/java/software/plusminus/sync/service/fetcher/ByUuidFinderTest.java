@@ -39,7 +39,7 @@ public class ByUuidFinderTest extends SyncIntegrationTest {
     @Test
     public void fetchEntityByUuid() {
         Optional<EntityWithUuid> fetched = byUuidFinder().find(entity);
-        check(fetched).isNotEmpty().isLike(entity);
+        check(fetched).isLike(entity);
     }
     
     @Test
