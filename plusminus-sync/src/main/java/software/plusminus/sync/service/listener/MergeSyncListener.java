@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@ConditionalOnProperty(value = "plusminus.sync.merge", matchIfMissing = true)
+@ConditionalOnProperty(value = "sync.merge", matchIfMissing = true)
 @AllArgsConstructor
 @Component
 public class MergeSyncListener implements SyncListener {

@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(value = DataController.class, properties = "plusminus.data.controller=true")
+@WebMvcTest(value = DataController.class, properties = "data.controller=true")
 public class DataControllerIntegrationTest {
 
     @Autowired

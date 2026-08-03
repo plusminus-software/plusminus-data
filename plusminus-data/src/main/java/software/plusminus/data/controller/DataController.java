@@ -35,7 +35,7 @@ import software.plusminus.metadata.MetadataContext;
 @AllArgsConstructor
 @RequestMapping("/data")
 @ConditionalOnClass(DispatcherServlet.class)
-@ConditionalOnProperty("plusminus.data.controller")
+@ConditionalOnProperty("data.controller")
 @RestController
 public class DataController {
 

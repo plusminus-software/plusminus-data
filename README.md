@@ -57,7 +57,7 @@ All modules ship Spring Boot auto-configurations, so they activate automatically
 `DataController` exposes CRUD endpoints under `/data` for any managed entity. It is disabled by default; enable it with:
 
 ```properties
-plusminus.data.controller=true
+data.controller=true
 ```
 
 | Method | Path | Description |
