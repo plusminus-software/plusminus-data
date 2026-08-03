@@ -2,7 +2,6 @@ package software.plusminus.sync.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,9 @@ import software.plusminus.sync.models.ProductOutcome;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -234,8 +235,11 @@ public class SyncControllerIntegrationTest extends SyncIntegrationTest {
     }
 
     private Security security(String tenant, String device) {
+        Map<String, String> parameters = new LinkedHashMap<>();
+        parameters.put("tenant", tenant);
+        parameters.put("device", device);
         return Security.builder()
-                .parameters(ImmutableMap.of("tenant", tenant, "device", device))
+                .parameters(parameters)
                 .build();
     }
 

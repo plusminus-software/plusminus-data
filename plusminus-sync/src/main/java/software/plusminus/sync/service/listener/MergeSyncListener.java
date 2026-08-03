@@ -1,6 +1,6 @@
 package software.plusminus.sync.service.listener;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import software.plusminus.data.repository.DataRepository;
@@ -21,18 +21,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ConditionalOnProperty(value = "plusminus.sync.merge", matchIfMissing = true)
+@AllArgsConstructor
 @Component
 public class MergeSyncListener implements SyncListener {
 
-    @Autowired
     private List<Merger> mergers;
-    @Autowired
     private List<Finder> finders;
-    @Autowired
     private SyncTransactionService transactionService;
-    @Autowired
     private SyncVersionService versionService;
-    @Autowired
     private DataRepository repository;
 
     @Override
@@ -86,8 +82,7 @@ public class MergeSyncListener implements SyncListener {
         if (id == null) {
             throw new SyncException("Id must not be null on UPDATE sync");
         }
-        T current = repository.getById(type, id);
-        return Optional.ofNullable(current);
+        return repository.findById(type, id);
     }
 
     private <T extends ApiObject> void populateId(T source, T target) {

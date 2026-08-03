@@ -94,8 +94,9 @@ public class DataServiceTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void getByIdThrowsWhenObjectNotFound() {
-        when(dataRepository.getById(TestEntity.class, 1L)).thenReturn(null);
+    public void getByIdPropagatesNotFoundFromDataRepository() {
+        when(dataRepository.getById(TestEntity.class, 1L))
+                .thenThrow(new NotFoundException("Can't find object with id 1"));
         dataService.getById(TestEntity.class, 1L);
     }
 

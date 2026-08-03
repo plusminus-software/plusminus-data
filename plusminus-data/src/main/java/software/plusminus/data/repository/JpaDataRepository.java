@@ -14,6 +14,7 @@ import software.plusminus.data.event.DataEventPublisher;
 import software.plusminus.util.EntityUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -33,10 +34,12 @@ public class JpaDataRepository implements DataRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public <T, ID> T getById(Class<T> type, ID id) {
+    public <T, ID> Optional<T> findById(Class<T> type, ID id) {
         T entity = entityManager.find(type, id);
-        publisher.publishRead(entity);
-        return entity;
+        if (entity != null) {
+            publisher.publishRead(entity);
+        }
+        return Optional.ofNullable(entity);
     }
 
     @Override

@@ -20,7 +20,7 @@ public class DataCrudRepository<T, ID> implements CrudRepository<T, ID> {
 
     @Override
     public Optional<T> findById(ID id) {
-        return Optional.ofNullable(dataRepository.getById(type, id));
+        return dataRepository.findById(type, id);
     }
 
     @Override

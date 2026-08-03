@@ -33,19 +33,14 @@ public class DataService {
         if (crudService != null) {
             return crudService.getById(id);
         }
-        T object;
         CrudRepository<T, ID> crudRepository = repositoryContext.findRepository(type);
         if (crudRepository != null) {
-            object = crudRepository.getById(id);
-        } else if (dataRepository != null) {
-            object = dataRepository.getById(type, id);
-        } else {
-            throw new NotFoundException("Can't find repository for type " + type);
+            return crudRepository.getById(id);
         }
-        if (object == null) {
-            throw new NotFoundException("Can't find object with id " + id);
+        if (dataRepository != null) {
+            return dataRepository.getById(type, id);
         }
-        return object;
+        throw new NotFoundException("Can't find repository for type " + type);
     }
 
     @Transactional(readOnly = true)
