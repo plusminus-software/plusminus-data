@@ -17,24 +17,26 @@ Built on Spring Boot 2.x / Spring Data JPA / Hibernate, targets Java 8. All modu
 | `plusminus-json` | JSON support for entities: `ApiObject`/`Classable`/`Jsog` marker interfaces, JSOG handling for cyclic object graphs, `@Uuid` annotation. |
 | `plusminus-dehydration` | Jackson serializer that "dehydrates" nested entity references into lightweight references instead of full object graphs. |
 | `plusminus-hibernate` | Dynamic per-request enabling of Hibernate `@Filter`s (`HibernateFilter`, `HibernateFilterService`) — the foundation for soft delete and multitenancy. |
-| `plusminus-softdelete` | Soft delete via `@SoftDelete`: deletes become logical flags, and a Hibernate filter hides soft-deleted rows. |
+| `plusminus-softdelete` | Read-side soft delete: registers the `softDeleteFilter` Hibernate filter so rows flagged as deleted are hidden from queries. Setting the flag is up to the application — the module does **not** turn `delete` calls into flag updates. |
 | `plusminus-tenant` | Multitenancy via `@Tenant`: queries and writes are scoped to the current tenant, resolved by a pluggable `TenantProvider` (security context or URL). |
 | `plusminus-audit` | Audit logging via `@Auditable`: CRUD actions are recorded as tenant-aware, sequenced `AuditLog` entities. |
 | `plusminus-sync` | Data synchronization for offline/multi-device clients via `@Syncable`: a `/sync` REST API to read a change stream and write client changes back, with merge strategies and audit-log-based change tracking. |
 
-In-repo dependency graph (arrows = "depends on"):
+Dependency graph between the modules of this repository (compile scope only; arrows = "depends on"):
 
 ```
 json        → metadata
 dehydration → json
 softdelete  → hibernate
 tenant      → hibernate, data-event
-data        → patch, metadata, data-event
+data        → patch, metadata, json, dehydration, data-event
 audit       → tenant, data-event
 sync        → data, audit, json, tenant, dehydration
 ```
 
-`metadata`, `patch`, `hibernate` and `data-event` have no in-repo dependencies.
+`metadata`, `patch`, `hibernate` and `data-event` depend on no other module of this repository
+(they do depend on modules from other plusminus repositories, such as `plusminus-utils`,
+`plusminus-scope` and `plusminus-http`).
 
 ## Getting started
 
@@ -71,18 +73,33 @@ Entity type names are resolved through `plusminus-metadata`; unknown types retur
 
 ### Cross-cutting features
 
-Annotate your entities to opt in:
+Annotate your entities to opt in. `@Auditable` and `@Syncable` go on the class; `@Tenant` and
+`@SoftDelete` mark the *field* that carries the tenant and the deleted flag:
 
 ```java
 @Entity
-@SoftDelete   // logical deletes
-@Tenant       // scope to the current tenant
 @Auditable    // record CRUD actions in the audit log
 @Syncable     // expose through the /sync API
+@FilterDef(name = "tenantFilter", parameters = @ParamDef(name = "tenant", type = "string"))
+@Filter(name = "tenantFilter", condition = "(tenant = :tenant or (:tenant = '' and tenant is null))")
+@FilterDef(name = "softDeleteFilter")
+@Filter(name = "softDeleteFilter", condition = "deleted = false")
 public class Article {
+
+    @Tenant
+    private String tenant;      // scope to the current tenant
+
+    @SoftDelete
+    private Boolean deleted;    // hidden from queries once true
+
     ...
 }
 ```
+
+The Hibernate `@FilterDef`/`@Filter` pairs are what actually restrict the queries;
+`plusminus-tenant` and `plusminus-softdelete` enable them per request. `plusminus-framework`'s
+`AbstractEntity` already carries all of the above, so entities extending it need none of this
+boilerplate.
 
 ## Building
 
