@@ -36,9 +36,7 @@ public class JpaDataRepository implements DataRepository {
     @Transactional(readOnly = true)
     public <T, ID> Optional<T> findById(Class<T> type, ID id) {
         T entity = entityManager.find(type, id);
-        if (entity != null) {
-            publisher.publishRead(entity);
-        }
+        publisher.publishRead(entity);
         return Optional.ofNullable(entity);
     }
 

@@ -24,6 +24,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static software.plusminus.check.Checks.check;
 
@@ -84,6 +86,13 @@ public class JpaDataRepositoryTest {
         repository.findById(TestEntity.class, 1L);
 
         verify(publisher).publishRead(saved);
+    }
+
+    @Test
+    public void findByIdMissedPublishesNoReadEvent() {
+        persistEntity();
+        repository.findById(TestEntity.class, 321L);
+        verify(publisher, never()).publishRead(any(TestEntity.class));
     }
 
     @Test
