@@ -41,6 +41,15 @@ public class SyncController {
         return syncService.read(types, excludeCurrentDevice, offset, size, direction);
     }
 
+    @GetMapping("/uuids")
+    @Validated(Read.class)
+    @Valid
+    public List<Sync<? extends ApiObject>> readByUuids(@RequestParam List<String> types,
+                                                       @RequestParam List<String> uuids) {
+
+        return syncService.readByUuids(types, uuids);
+    }
+
     @PostMapping
     @Validated(Write.class)
     public List<? extends ApiObject> write(@Valid @RequestBody List<Sync<? extends ApiObject>> actions) {

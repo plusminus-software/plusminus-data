@@ -139,6 +139,34 @@ public class AuditSyncServiceIntegrationTest extends SyncIntegrationTest {
     }
 
     @Test
+    public void readByUuidsReturnsCurrentStateOfEntity() {
+        Product product = new Product();
+        product.setName("read by uuid");
+        product.setUuid(UUID.randomUUID());
+        dataRepository.save(product);
+
+        List<Sync<? extends ApiObject>> syncs = syncService.readByUuids(
+                Collections.singletonList("Product"),
+                Collections.singletonList(product.getUuid().toString()));
+
+        assertThat(syncs).hasSize(1);
+        Sync<? extends ApiObject> sync = syncs.get(0);
+        assertThat(sync.getType()).isEqualTo(SyncType.CREATE);
+        assertThat(sync.getIndex()).isNotNull();
+        check(sync.getObject()).isInstanceOf(Product.class)
+                .isLike(product);
+    }
+
+    @Test
+    public void readByUuidsIgnoresUnknownUuids() {
+        List<Sync<? extends ApiObject>> syncs = syncService.readByUuids(
+                Collections.singletonList("Product"),
+                Collections.singletonList(UUID.randomUUID().toString()));
+
+        assertThat(syncs).isEmpty();
+    }
+
+    @Test
     public void updateTwoObjectsWithSameInnerEntity() {
         InnerEntity innerEntity = new InnerEntity();
         innerEntity = dataRepository.save(innerEntity);

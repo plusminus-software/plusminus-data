@@ -13,6 +13,8 @@ public interface SyncService {
                                          Long offset, Integer size,
                                          Sort.Direction direction);
 
+    List<Sync<? extends ApiObject>> readByUuids(List<String> types, List<String> uuids);
+
     List<? extends ApiObject> write(List<Sync<? extends ApiObject>> actions);
 
 }

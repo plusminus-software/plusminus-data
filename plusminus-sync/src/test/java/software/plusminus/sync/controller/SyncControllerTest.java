@@ -82,6 +82,27 @@ public class SyncControllerTest {
     }
 
     @Test
+    public void readByUuids() throws Exception {
+        List<Sync<? extends ApiObject>> syncs = singletonList(Sync.of(
+                JsonUtil.fromJson("/json/entity.json", TestEntity.class),
+                SyncType.CREATE, 1L, null));
+        when(service.readByUuids(singletonList("TestEntity"),
+                singletonList("8ee2a58a-14b1-4e0e-93cf-eb4bd2fd0d5e")))
+                .thenReturn(syncs);
+
+        String body = mvc
+                .perform(get("/sync/uuids?types=TestEntity"
+                        + "&uuids=8ee2a58a-14b1-4e0e-93cf-eb4bd2fd0d5e"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        check(body).isJson().is(JsonUtil.toJson(syncs));
+    }
+
+    @Test
     public void write() throws Exception {
         String json = ResourceUtils.toString("/json/entity.json");
         TestEntity entity = JsonUtil.fromJson(json, TestEntity.class);

@@ -3,11 +3,16 @@ package software.plusminus.sync.service.fetcher;
 import org.springframework.stereotype.Component;
 import software.plusminus.json.annotation.Uuid;
 import software.plusminus.json.model.ApiObject;
+import software.plusminus.sync.exception.SyncException;
 import software.plusminus.util.FieldUtils;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -40,6 +45,38 @@ public class ByUuidFinder implements Finder {
         return Optional.of(fetched.get(0));
     }
     
+    public <T extends ApiObject> List<T> findAll(Class<T> type, Collection<String> uuids) {
+        Optional<Field> uuidField = FieldUtils.findFirstWithAnnotation(type, Uuid.class);
+        if (!uuidField.isPresent() || uuids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Object> values = uuids.stream()
+                .map(uuid -> toFieldValue(uuid, uuidField.get()))
+                .collect(Collectors.toList());
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> criteriaQuery = cb.createQuery(type);
+        Root<T> root = criteriaQuery.from(type);
+        criteriaQuery.select(root)
+                .where(root.get(uuidField.get().getName()).in(values));
+        return entityManager.createQuery(criteriaQuery).getResultList();
+    }
+
+    private Object toFieldValue(String uuid, Field uuidField) {
+        Class<?> fieldType = uuidField.getType();
+        if (fieldType == String.class) {
+            return uuid;
+        }
+        if (fieldType == UUID.class) {
+            try {
+                return UUID.fromString(uuid);
+            } catch (IllegalArgumentException e) {
+                throw new SyncException("Incorrect uuid: " + uuid, e);
+            }
+        }
+        throw new SyncException("Unsupported type of the uuid field: " + fieldType.getName());
+    }
+
     private <T extends ApiObject> TypedQuery<T> buildQuery(Class<T> type, Field uuidField) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         

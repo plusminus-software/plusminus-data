@@ -23,14 +23,17 @@ import software.plusminus.sync.dto.Deleted;
 import software.plusminus.sync.dto.Sync;
 import software.plusminus.sync.dto.SyncType;
 import software.plusminus.sync.exception.SyncException;
+import software.plusminus.sync.service.fetcher.ByUuidFinder;
 import software.plusminus.sync.service.listener.SyncListener;
 import software.plusminus.sync.service.listener.SyncPostListener;
+import software.plusminus.util.EntityUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.Entity;
 
@@ -47,6 +50,8 @@ public class AuditSyncService implements SyncService {
     private AuditLogRepository auditLogRepository;
     @Autowired
     private DeviceContext deviceContext;
+    @Autowired
+    private ByUuidFinder uuidFinder;
     @Autowired
     private List<SyncListener> listeners;
     @Autowired(required = false)
@@ -82,6 +87,27 @@ public class AuditSyncService implements SyncService {
                 .map(this::toSync)
                 .peek(sync -> listeners.forEach(l -> l.onRead(sync)))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<Sync<? extends ApiObject>> readByUuids(List<String> types, List<String> uuids) {
+        if (uuids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Sync<? extends ApiObject>> syncs = new ArrayList<>();
+        for (String type : types) {
+            Class<ApiObject> entityType = entityService.findClass(type);
+            checkAnnotations(entityType);
+            for (ApiObject entity : uuidFinder.findAll(entityType, uuids)) {
+                Optional<Sync<? extends ApiObject>> sync = toCurrentSync(entity);
+                if (sync.isPresent()) {
+                    listeners.forEach(l -> l.onRead(sync.get()));
+                    syncs.add(sync.get());
+                }
+            }
+        }
+        return syncs;
     }
 
     @Override
@@ -135,6 +161,26 @@ public class AuditSyncService implements SyncService {
             default:
                 throw new SyncException("Unknown auditLog action " + auditLog.getAction());
         }
+    }
+
+    private Optional<Sync<? extends ApiObject>> toCurrentSync(ApiObject entity) {
+        ApiObject unproxied = unproxy(entity);
+        Long entityId = EntityUtils.findId(unproxied, Long.class);
+        if (entityId == null) {
+            return Optional.empty();
+        }
+        List<AuditLog<ApiObject>> auditLogs = auditLogRepository
+                .findByEntityTypeAndEntityIdAndCurrentTrue(unproxied.getClass().getName(), entityId);
+        AuditLog<ApiObject> current = null;
+        for (AuditLog<ApiObject> auditLog : auditLogs) {
+            if (current == null || auditLog.getNumber() > current.getNumber()) {
+                current = auditLog;
+            }
+        }
+        if (current == null) {
+            return Optional.empty();
+        }
+        return Optional.of(toSync(current));
     }
 
     private <T> T unproxy(T entity) {
